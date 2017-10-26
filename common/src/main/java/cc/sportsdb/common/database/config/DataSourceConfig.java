@@ -1,6 +1,7 @@
 package cc.sportsdb.common.database.config;
 
 import cc.sportsdb.common.database.support.DynamicDataSourceHolder;
+import cc.sportsdb.common.util.ToolUtil;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -41,6 +42,7 @@ public class DataSourceConfig implements EnvironmentAware {
             factory.setTargetName(dataSourceName);
             factory.bindPropertiesToTarget();
 
+            config.setJdbcUrl(ToolUtil.decodeUrl(config.getJdbcUrl()));
             HikariDataSource ds = new HikariDataSource(config);
             if (dataSourceName.equals(dataSourceNameContainer.getDefaultDataSourceName())) {
                 dynamicDataSource.setDefaultTargetDataSource(ds);
