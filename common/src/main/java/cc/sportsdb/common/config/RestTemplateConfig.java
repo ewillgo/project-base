@@ -1,8 +1,10 @@
 package cc.sportsdb.common.config;
 
+import cc.sportsdb.common.log.interceptor.HttpClientInterceptor;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -19,12 +21,20 @@ public class RestTemplateConfig {
     private Okhttp3Properties okhttp3Properties;
 
     @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate(okHttp3ClientHttpRequestFactory());
+    @LoadBalanced
+    public RestTemplate restTemplate(OkHttp3ClientHttpRequestFactory factory) {
+        return new RestTemplate(factory);
     }
 
+    @Bean(name = "httpRestTemplate")
+    public RestTemplate httpRestTemplate(OkHttp3ClientHttpRequestFactory factory) {
+        return new RestTemplate(factory);
+    }
+
+    @Bean
     public OkHttpClient okHttpClient() {
         return new OkHttpClient.Builder()
+                .addInterceptor(new HttpClientInterceptor())
                 .followRedirects(true)
                 .followSslRedirects(true)
                 .readTimeout(okhttp3Properties.getReadTimeout(), TimeUnit.SECONDS)
@@ -33,7 +43,8 @@ public class RestTemplateConfig {
                 .build();
     }
 
-    public OkHttp3ClientHttpRequestFactory okHttp3ClientHttpRequestFactory() {
-        return new OkHttp3ClientHttpRequestFactory(okHttpClient());
+    @Bean
+    public OkHttp3ClientHttpRequestFactory okHttp3ClientHttpRequestFactory(OkHttpClient okHttpClient) {
+        return new OkHttp3ClientHttpRequestFactory(okHttpClient);
     }
 }
