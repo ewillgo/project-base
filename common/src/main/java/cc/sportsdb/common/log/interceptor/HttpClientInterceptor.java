@@ -26,7 +26,7 @@ public class HttpClientInterceptor implements Interceptor {
         requestMap.put("qs", getQueryString(request));
         requestMap.put("body", requestBodyToMap(requestBodyToString(request)));
         requestMap.put("headers", request.headers().toMultimap());
-        logger.info(String.format("HttpRequest:%s", JsonUtil.toJsonString(requestMap)));
+        logger.info("HttpRequest:{}", JsonUtil.toJsonString(requestMap));
 
         long t1 = System.nanoTime();
         Response response = chain.proceed(chain.request());
@@ -40,7 +40,7 @@ public class HttpClientInterceptor implements Interceptor {
         responseMap.put("url", response.request().url().toString());
         responseMap.put("headers", response.headers().toMultimap());
         responseMap.put("response", getResponseMap(mediaType, responseString));
-        logger.info(String.format("HttpResponse:%s", JsonUtil.toJsonString(responseMap)));
+        logger.info("HttpResponse:{}", JsonUtil.toJsonString(responseMap));
 
         return response.newBuilder()
                 .body(ResponseBody.create(mediaType, responseString))
