@@ -15,7 +15,7 @@ public class XSSFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        logger.info("XSSFilter initialize.");
+        logger.info("XSSFilter initialized.");
     }
 
     @Override

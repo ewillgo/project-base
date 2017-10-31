@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.BindException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -29,13 +28,13 @@ public class DataSourceConfig implements EnvironmentAware {
     private Environment environment;
 
     @Bean
-    public AbstractRoutingDataSource dataSource(DataSourceNameContainer dataSourceNameContainer) throws BindException {
+    public AbstractRoutingDataSource dataSource(DataSourceList dataSourceList) throws BindException {
         PropertySourcesBinder builder = new PropertySourcesBinder((ConfigurableEnvironment) environment);
 
         DynamicDataSource dynamicDataSource = new DynamicDataSource();
         Map<Object, Object> dataSourceMap = new HashMap<>();
 
-        for (String dataSourceName : dataSourceNameContainer.getDataSourceNames()) {
+        for (String dataSourceName : dataSourceList.getDataSourceNames()) {
             HikariConfig config = new HikariConfig();
             PropertiesConfigurationFactory<HikariConfig> factory = new PropertiesConfigurationFactory<>(config);
             factory.setPropertySources(builder.getPropertySources());
@@ -44,7 +43,7 @@ public class DataSourceConfig implements EnvironmentAware {
 
             config.setJdbcUrl(ToolUtil.decodeUrl(config.getJdbcUrl()));
             HikariDataSource ds = new HikariDataSource(config);
-            if (dataSourceName.equals(dataSourceNameContainer.getDefaultDataSourceName())) {
+            if (dataSourceName.equals(dataSourceList.getDefaultDataSourceName())) {
                 dynamicDataSource.setDefaultTargetDataSource(ds);
             }
 
@@ -71,27 +70,5 @@ public class DataSourceConfig implements EnvironmentAware {
         protected Object determineCurrentLookupKey() {
             return DynamicDataSourceHolder.peekCurrentDataSourceName();
         }
-    }
-
-    public static class DataSourceNameContainer {
-        private final List<String> dataSourceNames;
-        private final String defaultDataSourceName;
-
-        public DataSourceNameContainer(List<String> dataSourceNames) {
-            this.dataSourceNames = dataSourceNames;
-            if (this.dataSourceNames == null || this.dataSourceNames.isEmpty()) {
-                throw new IllegalArgumentException("DataSource name must be supply at least one");
-            }
-            this.defaultDataSourceName = this.dataSourceNames.get(0);
-        }
-
-        public List<String> getDataSourceNames() {
-            return dataSourceNames;
-        }
-
-        public String getDefaultDataSourceName() {
-            return defaultDataSourceName;
-        }
-
     }
 }

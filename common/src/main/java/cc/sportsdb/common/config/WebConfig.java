@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 @Configuration
-@ImportAutoConfiguration({DataSourceConfig.class, RestTemplateConfig.class})
+@ImportAutoConfiguration({WebMvcConfig.class, DataSourceConfig.class, RestTemplateConfig.class})
 public class WebConfig {
 
     @Bean

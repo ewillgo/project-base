@@ -5,6 +5,8 @@ import org.jsoup.safety.Whitelist;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 public class XSSHttpServletRequest extends HttpServletRequestWrapper {
@@ -22,7 +24,7 @@ public class XSSHttpServletRequest extends HttpServletRequestWrapper {
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        Map<String, String[]> map = super.getParameterMap();
+        Map<String, String[]> map = new HashMap<>(super.getParameterMap());
         if (map == null || map.isEmpty()) {
             return map;
         }
@@ -41,7 +43,7 @@ public class XSSHttpServletRequest extends HttpServletRequestWrapper {
             map.put(entry.getKey(), newValues);
         }
 
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
     @Override
