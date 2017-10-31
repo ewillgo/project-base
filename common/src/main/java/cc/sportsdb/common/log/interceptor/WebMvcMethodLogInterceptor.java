@@ -35,7 +35,7 @@ public class WebMvcMethodLogInterceptor extends HandlerInterceptorAdapter {
 
         logger.info("\n--------------------\nDate\t\t: {}\nUrl\t\t\t: {}\nMethod\t\t: {} {} {}.{}({});\nParameters\t: {}\n",
                 DateUtil.now(),
-                request.getRequestURL().toString(),
+                request.getRequestURL().toString() + "?" + request.getQueryString(),
                 getMethodAnnotations(handlerMethod),
                 handlerMethod.getMethod().getReturnType().getSimpleName(),
                 handlerMethod.getBeanType().getName(),
