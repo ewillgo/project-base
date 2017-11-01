@@ -1,6 +1,8 @@
 package cc.sportsdb.common.dto;
 
-public class Result<T> {
+import java.io.Serializable;
+
+public class Result<T> implements Serializable {
     private Integer status;
     private String message;
     private T data;
@@ -28,4 +30,9 @@ public class Result<T> {
     public void setData(T data) {
         this.data = data;
     }
+
+    public static final Integer SUCCESS = 0;
+    public static final Integer FAIL = 10000;
+    public static final String SUCCESS_MESSAGE = "Operation success.";
+    public static final String FAIL_MESSAGE = "Operation fail.";
 }
