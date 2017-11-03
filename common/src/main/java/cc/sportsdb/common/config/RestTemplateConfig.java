@@ -8,6 +8,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,6 +22,7 @@ public class RestTemplateConfig {
     private Okhttp3Properties okhttp3Properties;
 
     @Bean
+    @Primary
     @LoadBalanced
     public RestTemplate restTemplate(OkHttp3ClientHttpRequestFactory factory) {
         return new RestTemplate(factory);

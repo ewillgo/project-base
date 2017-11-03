@@ -1,0 +1,10 @@
+mybatis:
+  configuration:
+    map-underscore-to-camelCase: true
+  mapper-locations: "classpath*:mappers/**/*.xml"
+
+okhttp3:
+  readTimeout: 5
+  connectTimeout: 5
+  maxIdleConnections: 1
+  keepAliveDuration: 1

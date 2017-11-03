@@ -33,7 +33,7 @@ public class HttpClientInterceptor implements Interceptor {
         long t2 = System.nanoTime();
 
         MediaType mediaType = response.body().contentType();
-        String responseString = getResponseString(mediaType, response);
+        String responseString = getResponseString(response);
         Map<String, Object> responseMap = new LinkedHashMap<>();
         responseMap.put("status", response.code());
         responseMap.put("time", String.format("%.1fms", (t2 - t1) / 1e6d));
@@ -60,20 +60,18 @@ public class HttpClientInterceptor implements Interceptor {
             paramMap.put(name, url.queryParameterValues(name));
         });
 
-        return paramMap;
+        return paramMap.isEmpty() ? null : paramMap;
     }
 
     private static final String JSON_TYPE = "application/json";
 
-    private String getResponseString(MediaType mediaType, Response response) {
+    private String getResponseString(Response response) {
         String responseString = "";
 
-        if (JSON_TYPE.equalsIgnoreCase(String.format("%s/%s", mediaType.type(), mediaType.subtype()))) {
-            try {
-                responseString = response.body().string();
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
+        try {
+            responseString = response.body().string();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
 
         return responseString;
@@ -96,7 +94,9 @@ public class HttpClientInterceptor implements Interceptor {
     private Map<String, Object> requestBodyToMap(String requestBodyString) {
         Map<String, Object> requestBodyMap = null;
         try {
-            requestBodyMap = JsonUtil.parse(requestBodyString, Map.class);
+            if (requestBodyString != null) {
+                requestBodyMap = JsonUtil.parse(requestBodyString, Map.class);
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
