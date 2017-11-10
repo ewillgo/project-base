@@ -1,6 +1,6 @@
 package cc.sportsdb.common.config;
 
-import cc.sportsdb.common.log.interceptor.HttpClientInterceptor;
+import cc.sportsdb.common.log.HttpClientInterceptor;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;

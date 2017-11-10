@@ -1,4 +1,4 @@
-package cc.sportsdb.common.log.aspect;
+package cc.sportsdb.common.log;
 
 import cc.sportsdb.common.util.DateUtil;
 import cc.sportsdb.common.util.JsonUtil;

@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 @Configuration
-@ComponentScan(value = {"cc.sportsdb.common.**.controller", "cc.sportsdb.common.log.**.aspect", "cc.sportsdb.common.**.util"})
+@ComponentScan(value = {"cc.sportsdb.common.**.controller", "cc.sportsdb.common.**.log", "cc.sportsdb.common.**.util"})
 @ImportAutoConfiguration({WebMvcConfig.class, DataSourceConfig.class, RestTemplateConfig.class})
 public class WebConfig {
 

@@ -1,4 +1,4 @@
-package cc.sportsdb.common.log.interceptor;
+package cc.sportsdb.common.log;
 
 import cc.sportsdb.common.util.JsonUtil;
 import okhttp3.*;

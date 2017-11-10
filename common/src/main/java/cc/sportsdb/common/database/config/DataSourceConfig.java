@@ -42,6 +42,7 @@ public class DataSourceConfig implements EnvironmentAware {
             factory.bindPropertiesToTarget();
 
             config.setJdbcUrl(ToolUtil.decodeUrl(config.getJdbcUrl()));
+            config.setPassword(ToolUtil.decodeUrl(config.getPassword()));
             HikariDataSource ds = new HikariDataSource(config);
             if (dataSourceName.equals(dataSourceList.getDefaultDataSourceName())) {
                 dynamicDataSource.setDefaultTargetDataSource(ds);

@@ -44,7 +44,7 @@ public class LoggingProperties {
         return this;
     }
 
-    LogLevel getLogLevel() {
+    public LogLevel getLogLevel() {
         return logLevel;
     }
 

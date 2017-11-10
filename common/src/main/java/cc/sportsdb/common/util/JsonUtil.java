@@ -39,13 +39,20 @@ public final class JsonUtil {
     }
 
     public static String toJsonString(Object value) {
-        return toJsonString(value, OBJECT_MAPPER);
+        return toJsonString(value, OBJECT_MAPPER, false);
     }
 
-    public static String toJsonString(Object value, ObjectMapper objectMapper) {
+    public static String toPrettyJsonString(Object value) {
+        return toJsonString(value, OBJECT_MAPPER, true);
+    }
+
+    public static String toJsonString(Object value, ObjectMapper objectMapper, boolean pretty) {
         String jsonString = null;
         try {
-            jsonString = objectMapper.writeValueAsString(value);
+            ;
+            jsonString = pretty
+                    ? objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(value)
+                    : objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             logger.error("To json string fail", e);
         }
