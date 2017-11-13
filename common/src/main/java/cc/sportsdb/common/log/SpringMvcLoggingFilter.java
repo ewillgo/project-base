@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.util.ContentCachingRequestWrapper;
-import org.springframework.web.util.WebUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -30,24 +28,15 @@ public class SpringMvcLoggingFilter extends OncePerRequestFilter implements Orde
             return;
         }
 
-        long startTime = 0;
-        boolean logResponse = false;
-        HttpServletRequest httpServletRequest = request;
+        LogBuilder logBuilder = new LogBuilder(loggingProperties.getLogLevel());
+
         try {
-            if (LogHelper.cacheRequestIfNecessary(request, isAsyncDispatch(request))) {
-                httpServletRequest = new ContentCachingRequestWrapper(request);
-                logResponse = true;
-            }
-            LOGGER.info(new LogBuilder(httpServletRequest, loggingProperties.getLogLevel()).buildSpringMvcRequestLog());
-            startTime = System.nanoTime();
-            filterChain.doFilter(httpServletRequest, response);
+            LOGGER.info("{}", logBuilder.setHttpServletRequest(request, isAsyncDispatch(request)).buildRequestLog());
+            logBuilder.setStartTime(System.nanoTime());
+            filterChain.doFilter(logBuilder.getHttpServletRequest(), response);
         } finally {
-            if (logResponse && !isAsyncStarted(httpServletRequest)) {
-                ContentCachingRequestWrapper wrapper =
-                        WebUtils.getNativeRequest(httpServletRequest, ContentCachingRequestWrapper.class);
-                long endTime = System.nanoTime();
-                LOGGER.info(new LogBuilder(httpServletRequest, loggingProperties.getLogLevel()).buildSpringMvcResponseLog(startTime, endTime));
-            }
+            logBuilder.setEndTime(System.nanoTime());
+            LOGGER.info("{}", logBuilder.setHttpServletResponse(response, isAsyncStarted(request)).buildResponseLog());
         }
     }
 
