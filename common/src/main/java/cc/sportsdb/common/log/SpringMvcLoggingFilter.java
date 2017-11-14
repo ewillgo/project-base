@@ -28,15 +28,17 @@ public class SpringMvcLoggingFilter extends OncePerRequestFilter implements Orde
             return;
         }
 
-        LogBuilder logBuilder = new LogBuilder(loggingProperties.getLogLevel());
+        LogBuilder logBuilder = new LogBuilder(request, response, loggingProperties.getLogLevel());
 
         try {
-            LOGGER.info("{}", logBuilder.setHttpServletRequest(request, isAsyncDispatch(request)).buildRequestLog());
+            LOGGER.info("{}", logBuilder.buildRequestLog());
             logBuilder.setStartTime(System.nanoTime());
-            filterChain.doFilter(logBuilder.getHttpServletRequest(), response);
+            filterChain.doFilter(logBuilder.getHttpServletRequest(), logBuilder.getHttpServletResponse());
         } finally {
+            // When filter chain raise a exception, end time will be zero,
+            // so put it into finally-block.
             logBuilder.setEndTime(System.nanoTime());
-            LOGGER.info("{}", logBuilder.setHttpServletResponse(response, isAsyncStarted(request)).buildResponseLog());
+            LOGGER.info("{}", logBuilder.buildResponseLog(response.getContentType()));
         }
     }
 

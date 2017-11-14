@@ -18,7 +18,7 @@ public class LoggingProperties {
 
     private void init() {
         ignoreUrlSet.addAll(Arrays.asList("/**/encrypt", "/**/decrypt", "/fonts/**", "/css/**"));
-        ignoreSuffixSet.addAll(Arrays.asList(".jpg", ".js", ".png", ".tiff", ".bmp", ".gif", ".jpeg", ".ico", ".css"));
+        ignoreSuffixSet.addAll(Arrays.asList(".jpg", ".js", ".json", ".png", ".tiff", ".bmp", ".gif", ".jpeg", ".ico", ".css"));
     }
 
     public LoggingProperties addIgnoreUrl(String url) {

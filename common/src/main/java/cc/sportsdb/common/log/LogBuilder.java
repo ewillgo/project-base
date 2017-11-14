@@ -19,12 +19,14 @@ import java.util.stream.Collectors;
 public class LogBuilder {
 
     private final LogLevel logLevel;
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
     private long startTime;
     private long endTime;
 
-    LogBuilder(LogLevel logLevel) {
+    LogBuilder(HttpServletRequest request, HttpServletResponse response, LogLevel logLevel) {
+        this.request = LogHelper.logRequestBodyIfNecessary(request);
+        this.response = LogHelper.logResponseBodyIfNecessary(request, response);
         this.logLevel = logLevel;
     }
 
@@ -32,21 +34,8 @@ public class LogBuilder {
         return request;
     }
 
-    LogBuilder setHttpServletRequest(HttpServletRequest request, boolean isAsyncDispatch) {
-        this.request = LogHelper.logRequestBodyIfNecessary(request, isAsyncDispatch);
-        return this;
-    }
-
     HttpServletResponse getHttpServletResponse() {
         return response;
-    }
-
-    LogBuilder setHttpServletResponse(HttpServletResponse response, boolean isAsyncStarted) {
-        if (request == null) {
-            throw new RuntimeException("Request was null");
-        }
-        this.response = LogHelper.logResponseDataIfNecessary(request, response, isAsyncStarted);
-        return this;
     }
 
     String buildRequestLog() {
@@ -56,17 +45,21 @@ public class LogBuilder {
         logMap.put("method", request.getMethod().toLowerCase());
         logMap.put("parameters", getParameterMap());
         logMap.put("body", getRequestBody());
-        logMap.put("headers", getRequestHeaders());
+        if (logLevel == LogLevel.PROD) {
+            logMap.put("headers", getRequestHeaders());
+        }
         return String.format("{\"request\":%s}", JsonUtil.toJsonString(logMap));
     }
 
-    String buildResponseLog() {
+    String buildResponseLog(String contentType) {
         Map<String, Object> logMap = new LinkedHashMap<>();
         logMap.put("status", response.getStatus());
         logMap.put("spend", getSpendTime());
         logMap.put("url", getUrlWithQueryString());
-        logMap.put("headers", getResponseHeaders());
-        logMap.put("data", getResponseData());
+        if (logLevel == LogLevel.PROD) {
+            logMap.put("headers", getResponseHeaders());
+        }
+        logMap.put("respdata", getResponseData(contentType));
         return String.format("{\"response\":%s}", JsonUtil.toJsonString(logMap));
     }
 
@@ -89,8 +82,8 @@ public class LogBuilder {
         return request instanceof ContentCachingRequestWrapper;
     }
 
-    private boolean isLogResponseBody() {
-        return response instanceof ContentCachingResponseWrapper;
+    private boolean isLogResponseBody(String contentType) {
+        return response instanceof ContentCachingResponseWrapper && LogHelper.isLogResponseBody(contentType);
     }
 
     private String getSpendTime() {
@@ -115,16 +108,16 @@ public class LogBuilder {
         return null;
     }
 
-    private Object getResponseData() {
-        if (!isLogResponseBody()) {
+    private Object getResponseData(String contentType) {
+        if (!isLogResponseBody(contentType)) {
             return null;
         }
 
         String responseData = null;
         ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
-        byte[] bytes = wrapper.getContentAsByteArray();
 
         try {
+            byte[] bytes = wrapper.getContentAsByteArray();
             responseData = new String(bytes, 0, bytes.length, wrapper.getCharacterEncoding());
             if (!"".equals(responseData)) {
                 return JsonUtil.parse(responseData, Map.class);

@@ -26,8 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Aspect
-@Component
+//@Aspect
+//@Component
+@Deprecated
 public class WebLogAspect implements Ordered {
 
     @Value("${spring.cloud.config.profile}")

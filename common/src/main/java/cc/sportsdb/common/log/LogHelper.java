@@ -30,31 +30,33 @@ public final class LogHelper {
                 && !matchSuffix(url, loggingProperties.getIgnoreSuffixSet()) && !matchUrl(url, loggingProperties.getIgnoreUrlSet());
     }
 
-    static HttpServletResponse logResponseDataIfNecessary(HttpServletRequest request, HttpServletResponse response, boolean isAsyncStarted) {
+    static boolean isLogResponseBody(String contentType) {
+        try {
+            MediaType mediaType = MediaType.parseMediaType(contentType);
+            return LOG_RESPONSE_BODY_MEDIA_TYPE.stream().anyMatch(mediaType::includes);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    static HttpServletResponse logResponseBodyIfNecessary(HttpServletRequest request, HttpServletResponse response) {
         if (response instanceof ContentCachingResponseWrapper) {
             return response;
         }
 
-        if (isAsyncStarted || isSpecialHttpMethod(request.getMethod())) {
+        if (isSpecialHttpMethod(request.getMethod())) {
             return response;
         }
 
-        try {
-            MediaType mediaType = MediaType.parseMediaType(response.getContentType());
-            return LOG_RESPONSE_BODY_MEDIA_TYPE.stream().noneMatch(mediaType::includes)
-                    ? response
-                    : new ContentCachingResponseWrapper(response);
-        } catch (Exception e) {
-            return response;
-        }
+        return new ContentCachingResponseWrapper(response);
     }
 
-    static HttpServletRequest logRequestBodyIfNecessary(HttpServletRequest request, boolean isAsyncDispatch) {
+    static HttpServletRequest logRequestBodyIfNecessary(HttpServletRequest request) {
         if (request instanceof ContentCachingRequestWrapper) {
             return request;
         }
 
-        if (isAsyncDispatch || isSpecialHttpMethod(request.getMethod())) {
+        if (isSpecialHttpMethod(request.getMethod())) {
             return request;
         }
 

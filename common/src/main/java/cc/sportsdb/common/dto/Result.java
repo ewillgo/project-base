@@ -32,7 +32,7 @@ public class Result<T> implements Serializable {
     }
 
     public static final Integer SUCCESS = 0;
-    public static final Integer FAIL = 10000;
+    public static final Integer FAIL = -1;
     public static final String SUCCESS_MESSAGE = "Operation success.";
     public static final String FAIL_MESSAGE = "Operation fail.";
 }
