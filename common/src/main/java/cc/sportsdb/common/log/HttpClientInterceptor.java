@@ -21,12 +21,12 @@ public class HttpClientInterceptor implements Interceptor {
         Request request = chain.request();
 
         Map<String, Object> requestMap = new LinkedHashMap<>();
-        requestMap.put("method", request.method().toLowerCase());
         requestMap.put("url", request.url().url().toString());
-        requestMap.put("qs", getQueryString(request));
+        requestMap.put("method", request.method().toLowerCase());
+        requestMap.put("parameters", getQueryString(request));
         requestMap.put("body", requestBodyToMap(requestBodyToString(request)));
         requestMap.put("headers", request.headers().toMultimap());
-        logger.info("HttpRequest:{}", JsonUtil.toJsonString(requestMap));
+        logger.info("ok3req:{}", JsonUtil.toJsonString(requestMap));
 
         long t1 = System.nanoTime();
         Response response = chain.proceed(chain.request());
@@ -39,8 +39,8 @@ public class HttpClientInterceptor implements Interceptor {
         responseMap.put("time", String.format("%.1fms", (t2 - t1) / 1e6d));
         responseMap.put("url", response.request().url().toString());
         responseMap.put("headers", response.headers().toMultimap());
-        responseMap.put("response", getResponseMap(mediaType, responseString));
-        logger.info("HttpResponse:{}", JsonUtil.toJsonString(responseMap));
+        responseMap.put("respdata", getResponseMap(mediaType, responseString));
+        logger.info("ok3resp:{}", JsonUtil.toJsonString(responseMap));
 
         return response.newBuilder()
                 .body(ResponseBody.create(mediaType, responseString))

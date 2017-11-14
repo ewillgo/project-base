@@ -54,7 +54,7 @@ public class LogBuilder {
     String buildResponseLog(String contentType) {
         Map<String, Object> logMap = new LinkedHashMap<>();
         logMap.put("status", response.getStatus());
-        logMap.put("spend", getSpendTime());
+        logMap.put("time", getSpendTime());
         logMap.put("url", getUrlWithQueryString());
         if (logLevel == LogLevel.PROD) {
             logMap.put("headers", getResponseHeaders());
