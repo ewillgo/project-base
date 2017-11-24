@@ -2,13 +2,10 @@ package cc.sportsdb.common.util;
 
 import java.security.MessageDigest;
 
-public final class HashUtil {
+public abstract class HashUtil {
     private static final java.security.SecureRandom random = new java.security.SecureRandom();
     private static final char[] HEX_DIGITS = "0123456789abcdef".toCharArray();
     private static final char[] CHAR_ARRAY = "_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-
-    private HashUtil() {
-    }
 
     public static String md5(String srcStr) {
         return hash("MD5", srcStr);

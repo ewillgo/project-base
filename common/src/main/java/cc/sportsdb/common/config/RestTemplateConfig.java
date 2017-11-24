@@ -1,6 +1,8 @@
 package cc.sportsdb.common.config;
 
+import cc.sportsdb.common.constant.RestConstant;
 import cc.sportsdb.common.log.HttpClientInterceptor;
+import cc.sportsdb.common.util.FrameworkUtil;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +27,12 @@ public class RestTemplateConfig {
     @Primary
     @LoadBalanced
     public RestTemplate restTemplate(OkHttp3ClientHttpRequestFactory factory) {
-        return new RestTemplate(factory);
+        return FrameworkUtil.enhanceRestTemplate(new RestTemplate(factory));
     }
 
-    @Bean(name = "httpRestTemplate")
+    @Bean(name = RestConstant.RAW_NAME)
     public RestTemplate httpRestTemplate(OkHttp3ClientHttpRequestFactory factory) {
-        return new RestTemplate(factory);
+        return FrameworkUtil.enhanceRestTemplate(new RestTemplate(factory));
     }
 
     @Bean

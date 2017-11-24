@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public final class JsonUtil {
+public abstract class JsonUtil {
 
     public static final ObjectMapper OBJECT_MAPPER;
     private static final Logger logger = LoggerFactory.getLogger(JsonUtil.class);

@@ -6,12 +6,9 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.UUID;
 
-public final class ToolUtil {
+public abstract class ToolUtil {
 
     private static final String CHARSET = "UTF-8";
-
-    private ToolUtil() {
-    }
 
     public static String encodeUrl(String url) {
         String encodeUrl = null;

@@ -126,7 +126,7 @@ public final class HttpUtil implements ApplicationContextAware {
         ResponseEntity<R> responseEntity = null;
 
         if (url == null || url.isEmpty()) {
-            throw new IllegalArgumentException("Empty url");
+            throw new IllegalArgumentException("Empty url.");
         }
 
         try {
