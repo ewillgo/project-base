@@ -10,7 +10,7 @@
         <project.base.version>1.0.0</project.base.version>
         <spring-cloud.version>Dalston.SR4</spring-cloud.version>
         <mysql.connector.version>6.0.6</mysql.connector.version>
-        <hikaricp.version>2.7.2</hikaricp.version>
+        <hikaricp.version>2.7.3</hikaricp.version>
         <validation.version>2.0.0.Final</validation.version>
         <hibernate.validator.version>6.0.4.Final</hibernate.validator.version>
         <mybatis.typehandlers.version>1.0.2</mybatis.typehandlers.version>

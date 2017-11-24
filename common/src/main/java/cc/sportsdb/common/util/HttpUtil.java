@@ -1,5 +1,7 @@
 package cc.sportsdb.common.util;
 
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -7,8 +9,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 
@@ -17,6 +22,7 @@ public final class HttpUtil implements ApplicationContextAware {
 
     private static RestTemplate restTemplate;
     private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
+    private static final int DEFAULT_CONNECTION_TIMEOUT = 10000;
 
     private HttpUtil() {
     }
@@ -24,6 +30,35 @@ public final class HttpUtil implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         restTemplate = applicationContext.getBean("httpRestTemplate", RestTemplate.class);
+    }
+
+    public static ByteArrayOutputStream download(String path, int timeout) throws IOException {
+        return download(path, null, timeout);
+    }
+
+    public static ByteArrayOutputStream download(String path) throws IOException {
+        return download(path, null, DEFAULT_CONNECTION_TIMEOUT);
+    }
+
+    public static ByteArrayOutputStream download(String path, HttpHeaders httpHeaders) throws IOException {
+        return download(path, httpHeaders, DEFAULT_CONNECTION_TIMEOUT);
+    }
+
+    public static ByteArrayOutputStream download(String path, HttpHeaders httpHeaders, int timeout) throws IOException {
+        if (StringUtils.isEmpty(path)) {
+            throw new IllegalArgumentException("Download path could not be empty.");
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Connection connection = Jsoup.connect(path)
+                .ignoreContentType(true)
+                .timeout(timeout);
+
+        if (httpHeaders != null && !httpHeaders.isEmpty()) {
+            connection.headers(httpHeaders.toSingleValueMap());
+        }
+
+        out.write(connection.execute().bodyAsBytes());
+        return out;
     }
 
     public static <T> T httpHead(String url, Class<T> responseType) {
