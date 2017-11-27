@@ -7,9 +7,9 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = {UUIDValidator.class})
-public @interface IsUUID {
-    String message() default "Not a UUID.";
+@Constraint(validatedBy = {PhoneValidator.class})
+public @interface IsPhone {
+    String message() default "Not a phone number.";
 
     Class<?>[] groups() default {};
 
