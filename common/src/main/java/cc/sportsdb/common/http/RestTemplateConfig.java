@@ -1,6 +1,5 @@
-package cc.sportsdb.common.config;
+package cc.sportsdb.common.http;
 
-import cc.sportsdb.common.constant.RestConstant;
 import cc.sportsdb.common.log.HttpClientInterceptor;
 import cc.sportsdb.common.util.FrameworkUtil;
 import okhttp3.ConnectionPool;

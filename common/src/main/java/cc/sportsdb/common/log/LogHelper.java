@@ -1,6 +1,5 @@
 package cc.sportsdb.common.log;
 
-import cc.sportsdb.common.config.LoggingProperties;
 import org.slf4j.Logger;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;

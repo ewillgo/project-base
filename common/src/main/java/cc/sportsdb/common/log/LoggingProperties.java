@@ -1,6 +1,4 @@
-package cc.sportsdb.common.config;
-
-import cc.sportsdb.common.log.LogLevel;
+package cc.sportsdb.common.log;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +37,7 @@ public class LoggingProperties {
         return Collections.unmodifiableSet(ignoreSuffixSet);
     }
 
-    LoggingProperties setLogLevel(String level) {
+    public LoggingProperties setLogLevel(String level) {
         this.logLevel = LogLevel.valueOf(level.toUpperCase());
         return this;
     }

@@ -1,6 +1,5 @@
 package cc.sportsdb.common.log;
 
-import cc.sportsdb.common.config.LoggingProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;

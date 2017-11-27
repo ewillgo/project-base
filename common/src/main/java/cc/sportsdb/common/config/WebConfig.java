@@ -1,7 +1,9 @@
 package cc.sportsdb.common.config;
 
 import cc.sportsdb.common.database.config.DataSourceConfig;
+import cc.sportsdb.common.log.LoggingProperties;
 import cc.sportsdb.common.log.SpringMvcLoggingFilter;
+import cc.sportsdb.common.http.RestTemplateConfig;
 import cc.sportsdb.common.util.JsonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;

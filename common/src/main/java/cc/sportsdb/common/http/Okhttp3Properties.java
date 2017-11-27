@@ -1,4 +1,4 @@
-package cc.sportsdb.common.config;
+package cc.sportsdb.common.http;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
