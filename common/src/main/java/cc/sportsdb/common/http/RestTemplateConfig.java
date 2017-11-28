@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-@Import({Okhttp3Properties.class})
+@Import(Okhttp3Properties.class)
 public class RestTemplateConfig {
 
     @Autowired

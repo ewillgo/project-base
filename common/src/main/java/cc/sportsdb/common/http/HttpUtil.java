@@ -1,4 +1,4 @@
-package cc.sportsdb.common.util;
+package cc.sportsdb.common.http;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
