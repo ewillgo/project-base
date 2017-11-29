@@ -29,7 +29,6 @@ public abstract class HashUtil {
         }
     }
 
-
     public static String md5(String srcStr) {
         return hash(MD5, srcStr);
     }
