@@ -9,6 +9,7 @@ import cc.sportsdb.common.util.JsonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -38,8 +39,15 @@ public class WebConfig {
 
     @Bean
     @Primary
-    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(JsonUtil.OBJECT_MAPPER);
+    public ObjectMapper objectMapper() {
+        return JsonUtil.OBJECT_MAPPER;
+    }
+
+    @Bean
+    @Primary
+    @ConditionalOnBean(ObjectMapper.class)
+    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
         converter.setSupportedMediaTypes(Arrays.asList(
                 MediaType.APPLICATION_JSON,
                 MediaType.APPLICATION_JSON_UTF8
@@ -53,14 +61,9 @@ public class WebConfig {
     }
 
     @Bean
-    public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter() {
-        return new MappingJackson2XmlHttpMessageConverter();
-    }
-
-    @Bean
-    @Primary
-    public ObjectMapper objectMapper() {
-        return JsonUtil.OBJECT_MAPPER;
+    @ConditionalOnBean(ObjectMapper.class)
+    public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter(ObjectMapper objectMapper) {
+        return new MappingJackson2XmlHttpMessageConverter(objectMapper);
     }
 
     @Bean
