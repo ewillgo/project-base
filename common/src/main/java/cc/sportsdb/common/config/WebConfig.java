@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import java.util.Arrays;
 
 @Configuration
+@EnableCaching
 @ComponentScan(value = {"cc.sportsdb.common.**.controller", "cc.sportsdb.common.**.log", "cc.sportsdb.common.**.util"})
 @ImportAutoConfiguration({
         WebMvcConfig.class,
