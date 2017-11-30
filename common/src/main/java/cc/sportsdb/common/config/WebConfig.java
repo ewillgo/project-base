@@ -61,9 +61,8 @@ public class WebConfig {
     }
 
     @Bean
-    @ConditionalOnBean(ObjectMapper.class)
-    public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter(ObjectMapper objectMapper) {
-        return new MappingJackson2XmlHttpMessageConverter(objectMapper);
+    public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter() {
+        return new MappingJackson2XmlHttpMessageConverter();
     }
 
     @Bean

@@ -1,6 +1,7 @@
 package cc.sportsdb.common.data.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -23,8 +24,10 @@ public class RedisConfig extends CachingConfigurerSupport {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public CacheManager cacheManager(RedisTemplate<String, Object> redisTemplate) {
-        RedisCacheManager redisCacheManager = new RedisCacheManager(redisTemplate);
+        RedisCacheManager redisCacheManager = new AutoRefreshRedisCacheManager(redisTemplate);
+        redisCacheManager.setUsePrefix(true);
         redisCacheManager.setLoadRemoteCachesOnStartup(false);
         redisCacheManager.setDefaultExpiration(RedisConstant.DEFAULT_CACHE_EXPIRE_IN_SECOND);
         return redisCacheManager;
@@ -32,6 +35,8 @@ public class RedisConfig extends CachingConfigurerSupport {
 
     @Override
     public KeyGenerator keyGenerator() {
-        return (target, method, params) -> target.getClass().getName() + "." + method.getName();
+        return (target, method, params) -> {
+            return target.getClass().getSimpleName() + "." + method.getName();
+        };
     }
 }
