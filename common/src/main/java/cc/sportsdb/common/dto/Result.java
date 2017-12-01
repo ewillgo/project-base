@@ -1,38 +1,42 @@
 package cc.sportsdb.common.dto;
 
-import java.io.Serializable;
+import org.springframework.data.annotation.Transient;
 
-public class Result<T> implements Serializable {
-    private Integer status;
-    private String message;
-    private T data;
+import java.util.LinkedHashMap;
+
+public class Result<T> extends LinkedHashMap<String, Object> {
+
+    @Transient private static final String STATUS = "status";
+    @Transient private static final String MESSAGE = "message";
+    @Transient private static final String DATA = "data";
 
     public Integer getStatus() {
-        return status;
+        return (Integer) get(STATUS);
     }
 
     public void setStatus(Integer status) {
-        this.status = status;
+        put(STATUS, status);
     }
 
     public String getMessage() {
-        return message;
+        return (String) get(MESSAGE);
     }
 
     public void setMessage(String message) {
-        this.message = message;
+        put(MESSAGE, message);
     }
 
+    @SuppressWarnings("unchecked")
     public T getData() {
-        return data;
+        return (T) get(DATA);
     }
 
     public void setData(T data) {
-        this.data = data;
+        put(DATA, data);
     }
 
-    public static final Integer SUCCESS = 0;
-    public static final Integer FAIL = -1;
-    public static final String SUCCESS_MESSAGE = "Operation success.";
-    public static final String FAIL_MESSAGE = "Operation fail.";
+    @Transient public static final Integer SUCCESS = 0;
+    @Transient public static final Integer FAIL = -1;
+    @Transient public static final String SUCCESS_MESSAGE = "Operation success.";
+    @Transient public static final String FAIL_MESSAGE = "Operation fail.";
 }

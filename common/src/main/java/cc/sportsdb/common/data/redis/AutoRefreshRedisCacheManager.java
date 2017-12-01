@@ -60,8 +60,9 @@ public class AutoRefreshRedisCacheManager extends RedisCacheManager {
 
         @Override
         public ValueWrapper get(Object key) {
-            System.out.println(this.toString());
-            return super.get(key);
+            ValueWrapper valueWrapper = super.get(key);
+
+            return valueWrapper;
         }
     }
 }
