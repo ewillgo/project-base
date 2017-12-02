@@ -29,7 +29,7 @@ public final class HttpUtil implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        restTemplate = applicationContext.getBean("httpRestTemplate", RestTemplate.class);
+        restTemplate = applicationContext.getBean(RestConstant.RAW_NAME, RestTemplate.class);
     }
 
     public static ByteArrayOutputStream download(String path, int timeout) throws IOException {

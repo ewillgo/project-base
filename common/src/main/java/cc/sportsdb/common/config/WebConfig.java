@@ -1,5 +1,6 @@
 package cc.sportsdb.common.config;
 
+import cc.sportsdb.common.data.mq.MqConfig;
 import cc.sportsdb.common.data.redis.RedisConfig;
 import cc.sportsdb.common.database.config.DataSourceConfig;
 import cc.sportsdb.common.http.RestTemplateConfig;
@@ -9,7 +10,6 @@ import cc.sportsdb.common.util.JsonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -25,12 +25,17 @@ import java.util.Arrays;
 
 @Configuration
 @EnableCaching
-@ComponentScan(value = {"cc.sportsdb.common.**.controller", "cc.sportsdb.common.**.log", "cc.sportsdb.common.**.util"})
+@ComponentScan(value = {
+        "cc.sportsdb.common.**.controller",
+        "cc.sportsdb.common.**.log",
+        "cc.sportsdb.common.**.util",
+        "cc.sportsdb.common.**.http"})
 @ImportAutoConfiguration({
         WebMvcConfig.class,
         DataSourceConfig.class,
         RestTemplateConfig.class,
-        RedisConfig.class
+        RedisConfig.class,
+        MqConfig.class
 })
 public class WebConfig {
 
@@ -45,7 +50,6 @@ public class WebConfig {
 
     @Bean
     @Primary
-    @ConditionalOnBean(ObjectMapper.class)
     public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
         converter.setSupportedMediaTypes(Arrays.asList(
@@ -56,11 +60,13 @@ public class WebConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public ByteArrayHttpMessageConverter byteArrayHttpMessageConverter() {
         return new ByteArrayHttpMessageConverter();
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter() {
         return new MappingJackson2XmlHttpMessageConverter();
     }
