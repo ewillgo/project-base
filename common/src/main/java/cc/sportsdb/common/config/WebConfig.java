@@ -29,7 +29,8 @@ import java.util.Arrays;
         "cc.sportsdb.common.**.controller",
         "cc.sportsdb.common.**.log",
         "cc.sportsdb.common.**.util",
-        "cc.sportsdb.common.**.http"})
+        "cc.sportsdb.common.**.http"
+})
 @ImportAutoConfiguration({
         WebMvcConfig.class,
         DataSourceConfig.class,
