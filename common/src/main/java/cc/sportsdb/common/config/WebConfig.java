@@ -11,11 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -24,7 +22,6 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import java.util.Arrays;
 
 @Configuration
-@EnableCaching
 @ComponentScan(value = {
         "cc.sportsdb.common.**.controller",
         "cc.sportsdb.common.**.log",
@@ -44,13 +41,13 @@ public class WebConfig {
     private String profile;
 
     @Bean
-    @Primary
+    @ConditionalOnMissingBean
     public ObjectMapper objectMapper() {
         return JsonUtil.OBJECT_MAPPER;
     }
 
     @Bean
-    @Primary
+    @ConditionalOnMissingBean
     public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
         converter.setSupportedMediaTypes(Arrays.asList(
