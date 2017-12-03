@@ -26,6 +26,7 @@ import java.util.Arrays;
         "cc.sportsdb.common.**.controller",
         "cc.sportsdb.common.**.log",
         "cc.sportsdb.common.**.util",
+        "cc.sportsdb.common.**.data",
         "cc.sportsdb.common.**.http"
 })
 @ImportAutoConfiguration({
