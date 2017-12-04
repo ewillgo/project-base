@@ -90,4 +90,18 @@ public final class MqUtil implements ApplicationContextAware {
 
         return queue;
     }
+
+    public static Binding binding(Queue queue, Exchange exchange, String routingKey) {
+        return binding(queue, exchange, routingKey, null);
+    }
+
+    public static Binding binding(Queue queue, Exchange exchange, String routingKey, Map<String, Object> data) {
+        Binding binding = BindingBuilder.bind(queue).to(exchange).with(routingKey).and(data);
+        try {
+            rabbitAdmin.declareBinding(binding);
+        } catch (Exception e) {
+            logger.error("Binding queue to exchange fail.", e);
+        }
+        return binding;
+    }
 }
