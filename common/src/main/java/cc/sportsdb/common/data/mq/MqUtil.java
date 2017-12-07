@@ -9,14 +9,10 @@ import org.springframework.util.StringUtils;
 
 import java.util.Map;
 
-public final class MqUtil {
+public abstract class MqUtil {
 
     private static RabbitAdmin rabbitAdmin = ApplicationContextHolder.getApplicationContext().getBean(MqConstant.AMQP_ADMIN, RabbitAdmin.class);
     private static final Logger logger = LoggerFactory.getLogger(MqUtil.class);
-
-    private MqUtil() {
-
-    }
 
     public static Exchange declareDirectExchange(String exchangeName, boolean durable, boolean autoDelete) {
         return declareExchange(exchangeName, ExchangeTypes.DIRECT, durable, autoDelete, null);
