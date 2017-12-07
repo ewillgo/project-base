@@ -1,4 +1,4 @@
-package cc.sportsdb.common.util;
+package cc.sportsdb.common.spring;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

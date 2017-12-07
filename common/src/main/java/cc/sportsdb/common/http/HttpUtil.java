@@ -1,14 +1,11 @@
 package cc.sportsdb.common.http;
 
+import cc.sportsdb.common.spring.ApplicationContextHolder;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,19 +14,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 
-@Component
-public final class HttpUtil implements ApplicationContextAware {
+public final class HttpUtil {
 
-    private static RestTemplate restTemplate;
+    private static RestTemplate restTemplate = ApplicationContextHolder.getApplicationContext().getBean(RestConstant.RAW_NAME, RestTemplate.class);
     private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
     private static final int DEFAULT_CONNECTION_TIMEOUT = 10000;
 
     private HttpUtil() {
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        restTemplate = applicationContext.getBean(RestConstant.RAW_NAME, RestTemplate.class);
     }
 
     public static ByteArrayOutputStream download(String path, int timeout) throws IOException {

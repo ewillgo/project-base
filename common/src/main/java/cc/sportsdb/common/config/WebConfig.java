@@ -6,11 +6,15 @@ import cc.sportsdb.common.database.config.DataSourceConfig;
 import cc.sportsdb.common.http.RestTemplateConfig;
 import cc.sportsdb.common.log.LoggingProperties;
 import cc.sportsdb.common.log.SpringMvcLoggingFilter;
+import cc.sportsdb.common.spring.ApplicationContextHolder;
 import cc.sportsdb.common.util.JsonUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -23,11 +27,7 @@ import java.util.Arrays;
 
 @Configuration
 @ComponentScan(value = {
-        "cc.sportsdb.common.**.controller",
-        "cc.sportsdb.common.**.log",
-        "cc.sportsdb.common.**.util",
-        "cc.sportsdb.common.**.data",
-        "cc.sportsdb.common.**.http"
+        "cc.sportsdb.common.**.controller"
 })
 @ImportAutoConfiguration({
         WebMvcConfig.class,
@@ -36,7 +36,7 @@ import java.util.Arrays;
         RedisConfig.class,
         MqConfig.class
 })
-public class WebConfig {
+public class WebConfig implements ApplicationContextAware {
 
     @Value("${spring.cloud.config.profile:prod}")
     private String profile;
@@ -83,4 +83,8 @@ public class WebConfig {
         return new SpringMvcLoggingFilter(loggingProperties);
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        ApplicationContextHolder.setApplicationContext(applicationContext);
+    }
 }

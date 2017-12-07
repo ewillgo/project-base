@@ -1,7 +1,7 @@
 package cc.sportsdb.common.http;
 
 import cc.sportsdb.common.log.HttpClientInterceptor;
-import cc.sportsdb.common.util.FrameworkUtil;
+import cc.sportsdb.common.spring.FrameworkUtil;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;

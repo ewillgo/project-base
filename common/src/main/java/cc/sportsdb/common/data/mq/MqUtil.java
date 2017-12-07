@@ -1,30 +1,21 @@
 package cc.sportsdb.common.data.mq;
 
+import cc.sportsdb.common.spring.ApplicationContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.Map;
 
-@Component
-public final class MqUtil implements ApplicationContextAware {
+public final class MqUtil {
 
-    private static RabbitAdmin rabbitAdmin;
+    private static RabbitAdmin rabbitAdmin = ApplicationContextHolder.getApplicationContext().getBean(MqConstant.AMQP_ADMIN, RabbitAdmin.class);
     private static final Logger logger = LoggerFactory.getLogger(MqUtil.class);
 
     private MqUtil() {
 
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        rabbitAdmin = applicationContext.getBean(MqConstant.AMQP_ADMIN, RabbitAdmin.class);
     }
 
     public static Exchange declareDirectExchange(String exchangeName, boolean durable, boolean autoDelete) {
