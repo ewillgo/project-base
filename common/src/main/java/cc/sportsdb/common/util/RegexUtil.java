@@ -9,6 +9,9 @@ public abstract class RegexUtil {
     public static final Pattern URL = Pattern.compile("[a-zA-z]+://[^\\s]*");
     public static final Pattern PHONE = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[3,7,8])|(18[0,5-9]))\\d{8}$");
 
+    private RegexUtil() {
+    }
+
     public static boolean isMatch(String str, Pattern pattern) {
         return pattern.matcher(str).matches();
     }

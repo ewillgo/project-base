@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 
-public final class HttpUtil {
+public abstract class HttpUtil {
 
     private static RestTemplate restTemplate = ApplicationContextHolder.getApplicationContext().getBean(RestConstant.RAW_NAME, RestTemplate.class);
     private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);

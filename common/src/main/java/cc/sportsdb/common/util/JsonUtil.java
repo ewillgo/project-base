@@ -24,6 +24,9 @@ public abstract class JsonUtil {
         OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
+    private JsonUtil() {
+    }
+
     public static <T> T parse(String jsonStr, Class<? extends T> clazz) {
         return parse(jsonStr, clazz, OBJECT_MAPPER);
     }

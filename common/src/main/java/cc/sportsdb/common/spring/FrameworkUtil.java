@@ -15,6 +15,9 @@ public abstract class FrameworkUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(FrameworkUtil.class);
 
+    private FrameworkUtil() {
+    }
+
     public static RestTemplate enhanceRestTemplate(RestTemplate restTemplate) {
         if (restTemplate == null) {
             throw new IllegalArgumentException("RestTemplate could not be null.");

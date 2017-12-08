@@ -7,4 +7,6 @@ public abstract class RedisUtil {
 
     private static RedisTemplate redisTemplate = ApplicationContextHolder.getApplicationContext().getBean(RedisConstant.REDIS_TEMPLATE_NAME, RedisTemplate.class);
 
+    private RedisUtil() {
+    }
 }
