@@ -2,7 +2,7 @@ package cc.sportsdb.common.config;
 
 import cc.sportsdb.common.data.mq.MqConfig;
 import cc.sportsdb.common.data.redis.RedisConfig;
-import cc.sportsdb.common.database.config.DataSourceConfig;
+import cc.sportsdb.common.database.DataSourceConfig;
 import cc.sportsdb.common.http.RestTemplateConfig;
 import cc.sportsdb.common.log.LoggingProperties;
 import cc.sportsdb.common.log.SpringMvcLoggingFilter;

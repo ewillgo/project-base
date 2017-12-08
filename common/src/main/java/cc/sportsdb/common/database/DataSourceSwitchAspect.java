@@ -1,7 +1,5 @@
-package cc.sportsdb.common.database.aspect;
+package cc.sportsdb.common.database;
 
-import cc.sportsdb.common.database.support.DynamicDataSourceHolder;
-import cc.sportsdb.common.database.annotation.DataSource;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

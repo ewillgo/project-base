@@ -1,4 +1,4 @@
-package cc.sportsdb.common.database.support;
+package cc.sportsdb.common.database;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

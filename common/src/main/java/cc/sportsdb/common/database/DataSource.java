@@ -1,4 +1,4 @@
-package cc.sportsdb.common.database.annotation;
+package cc.sportsdb.common.database;
 
 import java.lang.annotation.*;
 

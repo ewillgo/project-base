@@ -1,6 +1,5 @@
-package cc.sportsdb.common.database.config;
+package cc.sportsdb.common.database;
 
-import cc.sportsdb.common.database.support.DynamicDataSourceHolder;
 import cc.sportsdb.common.util.ToolUtil;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

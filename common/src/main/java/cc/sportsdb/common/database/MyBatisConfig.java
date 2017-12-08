@@ -1,4 +1,4 @@
-package cc.sportsdb.common.database.config;
+package cc.sportsdb.common.database;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
