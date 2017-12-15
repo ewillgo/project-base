@@ -72,8 +72,7 @@ public class RedisLock {
 
         while ((System.nanoTime() - nowTime) < retryTimeout) {
             if (OK.equalsIgnoreCase(set(lockKey, lockValue, expireTime))) {
-                locked = true;
-                return true;
+                return (locked = true);
             }
             sleep(10, 50000);
         }
@@ -108,9 +107,9 @@ public class RedisLock {
             Object nativeConnection = connection.getNativeConnection();
             Long result = 0L;
 
-            List<String> keys = new ArrayList<>();
+            List<String> keys = new ArrayList<>(1);
             keys.add(lockKey);
-            List<String> values = new ArrayList<>();
+            List<String> values = new ArrayList<>(1);
             values.add(lockValue);
 
             if (nativeConnection instanceof JedisCluster) {
@@ -131,7 +130,7 @@ public class RedisLock {
 
     }
 
-    private String set(final String key, final String value, final long seconds) {
+    private String set(String key, String value, long seconds) {
         Assert.isTrue(!StringUtils.isEmpty(key), "Key cannot be empty.");
         return redisTemplate.execute((RedisCallback<String>) connection -> {
             Object nativeConnection = connection.getNativeConnection();
