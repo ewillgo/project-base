@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,6 +23,9 @@ public class AutoRefreshRedisCacheManager extends RedisCacheManager {
     private static final String MARK = "$";
     private static final String SEPARATOR = "#";
     private static final Logger logger = LoggerFactory.getLogger(AutoRefreshRedisCacheManager.class);
+
+    private static final String SUPER_FIELD_CACHEMAP = "cacheMap";
+    private static final String SUPER_METHOD_UPDATECACHENAMES = "updateCacheNames";
 
     @Autowired
     DefaultListableBeanFactory beanFactory;
@@ -51,14 +55,45 @@ public class AutoRefreshRedisCacheManager extends RedisCacheManager {
         String[] cacheParams = name.split(SEPARATOR);
         String cacheName = cacheParams[0];
 
-        long expiration = 0;
-        try {
-            expiration = Long.valueOf(cacheParams[1]);
-            setDefaultExpiration(expiration);
-        } catch (Exception e) {
+        if (StringUtils.isEmpty(cacheName)) {
+            return null;
         }
 
-        return super.getCache(cacheName);
+        long expirationSecondTime = getExpirationTime(cacheName, cacheParams);
+        long preloadSecondTime = getPreloadTime(cacheParams);
+
+
+        Object object = ReflectionUtils.findField(getInstance().getClass(), SUPER_FIELD_CACHEMAP, ConcurrentHashMap.class);
+        if (object != null && object instanceof ConcurrentHashMap) {
+            ConcurrentHashMap<String, Cache> cacheMap = (ConcurrentHashMap<String, Cache>) object;
+            return getCache(cacheName, expirationSecondTime, preloadSecondTime, cacheMap);
+        } else {
+            return super.getCache(cacheName);
+        }
+    }
+
+    public Cache getCache(String cacheName, long expirationTime, long preloadTime, ConcurrentHashMap<String, Cache> cacheMap) {
+        Cache cache = cacheMap.get(cacheName);
+        if (cache != null) {
+            return cache;
+        } else {
+            synchronized (cacheMap) {
+                cache = cacheMap.get(cacheName);
+                if (cache == null) {
+//                    cache = getMissingCache(cacheName, expirationTime, preloadTime);
+                    if (cache != null) {
+                        cache = decorateCache(cache);
+                        cacheMap.put(cacheName, cache);
+
+                        Class<?> parameterTypes = String.class;
+                        Object[] parameters = {cacheName};
+                        Method method = ReflectionUtils.findMethod(getInstance().getClass(), SUPER_METHOD_UPDATECACHENAMES, parameterTypes);
+                        ReflectionUtils.invokeMethod(method, getInstance(), SUPER_METHOD_UPDATECACHENAMES, parameterTypes, parameters);
+                    }
+                }
+                return cache;
+            }
+        }
     }
 
     private long getExpirationTime(String cacheName, String[] cacheParams) {
@@ -92,32 +127,6 @@ public class AutoRefreshRedisCacheManager extends RedisCacheManager {
 
         return preloadTime;
     }
-
-//    public Cache getCache(String cacheName, long expirationTime, long preloadTime, ConcurrentHashMap<String, Cache> cacheMap) {
-//        Cache cache = cacheMap.get(cacheName);
-//        if (cache != null) {
-//            return cache;
-//        } else {
-//            // Fully synchronize now for missing cache creation...
-//            synchronized (cacheMap) {
-//                cache = cacheMap.get(cacheName);
-//                if (cache == null) {
-//                    // 调用我们自己的getMissingCache方法创建自己的cache
-//                    cache = getMissingCache(cacheName, expirationTime, preloadTime);
-//                    if (cache != null) {
-//                        cache = decorateCache(cache);
-//                        cacheMap.put(cacheName, cache);
-//
-//                        // 反射去执行父类的updateCacheNames(cacheName)方法
-//                        Class<?>[] parameterTypes = {String.class};
-//                        Object[] parameters = {cacheName};
-//                        ReflectionUtils.invokeMethod(getInstance(), SUPER_METHOD_UPDATECACHENAMES, parameterTypes, parameters);
-//                    }
-//                }
-//                return cache;
-//            }
-//        }
-//    }
 
     private RedisCacheManager getInstance() {
         if (redisCacheManager == null) {
