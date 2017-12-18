@@ -45,10 +45,10 @@ public class AutoRefreshRedisCacheManager extends RedisCacheManager {
         Pair<Long, Long> pair = TIME_MAP.get(cacheName);
         if (pair != null) {
             long expirationTime = pair.getFirst();
-            long preloadTime = pair.getSecond();
+            long refreshThreshold = pair.getSecond();
             return new AutoRefreshRedisCache(
                     cacheName, (isUsePrefix() ? getCachePrefix().prefix(cacheName) : null),
-                    getRedisOperations(), expirationTime, preloadTime, cacheNullValues);
+                    getRedisOperations(), expirationTime, refreshThreshold, cacheNullValues);
         } else {
             long expirationTime = computeExpiration(cacheName);
             return new AutoRefreshRedisCache(
@@ -68,7 +68,8 @@ public class AutoRefreshRedisCacheManager extends RedisCacheManager {
             return null;
         }
 
-        TIME_MAP.put(cacheName, Pair.make(getExpirationTime(cacheName, cacheParams), getPreloadTime(cacheParams)));
+        TIME_MAP.put(cacheName, Pair.make(
+                getExpirationTime(cacheName, cacheParams), getRefreshThreshold(cacheParams)));
         return super.getCache(cacheName);
     }
 
@@ -88,20 +89,20 @@ public class AutoRefreshRedisCacheManager extends RedisCacheManager {
         return expirationTime;
     }
 
-    private long getPreloadTime(String[] cacheParams) {
-        long preloadTime = 0;
+    private long getRefreshThreshold(String[] cacheParams) {
+        long refreshThreshold = 0;
 
         if (cacheParams.length > 2) {
-            String preloadStr = cacheParams[2];
-            if (!StringUtils.isEmpty(preloadStr)) {
-                if (preloadStr.contains(MARK)) {
-                    preloadStr = beanFactory.resolveEmbeddedValue(preloadStr);
+            String refreshThresholdStr = cacheParams[2];
+            if (!StringUtils.isEmpty(refreshThresholdStr)) {
+                if (refreshThresholdStr.contains(MARK)) {
+                    refreshThresholdStr = beanFactory.resolveEmbeddedValue(refreshThresholdStr);
                 }
-                preloadTime = Long.parseLong(preloadStr);
+                refreshThreshold = Long.parseLong(refreshThresholdStr);
             }
         }
 
-        return preloadTime;
+        return refreshThreshold;
     }
 
 }
