@@ -60,7 +60,7 @@ public class LogBuilder {
             logMap.put("headers", getResponseHeaders());
         }
         logMap.put("respdata", getResponseData(contentType));
-        return String.format("{\"response\":%s}", JsonUtil.toJsonString(logMap));
+        return String.format("{\"response\":%s}\n", JsonUtil.toJsonString(logMap));
     }
 
     LogBuilder setStartTime(long startTime) {

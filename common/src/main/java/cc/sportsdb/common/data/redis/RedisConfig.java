@@ -1,6 +1,7 @@
 package cc.sportsdb.common.data.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -23,6 +24,11 @@ public class RedisConfig extends CachingConfigurerSupport {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setDefaultSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
         return redisTemplate;
+    }
+
+    @Bean
+    public AutoRefreshAspect autoRefreshAspect() {
+        return new AutoRefreshAspect();
     }
 
     @Bean

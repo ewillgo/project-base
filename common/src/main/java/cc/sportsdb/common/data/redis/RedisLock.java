@@ -3,7 +3,7 @@ package cc.sportsdb.common.data.redis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.Jedis;
@@ -43,24 +43,24 @@ public class RedisLock {
     private volatile boolean locked = false;
     private long timeout = DEFAULT_RETRY_TIMEOUT_MS;
     private int expireTime = DEFAULT_EXPIRE_MS;
-    private StringRedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
     private final Random random = new Random();
 
-    public RedisLock(StringRedisTemplate redisTemplate, String lockKey) {
+    public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey) {
         this(redisTemplate, lockKey, null, null);
     }
 
-    public RedisLock(StringRedisTemplate redisTemplate, String lockKey, int expireTime) {
+    public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey, int expireTime) {
         this(redisTemplate, lockKey, expireTime, null);
     }
 
-    public RedisLock(StringRedisTemplate redisTemplate, String lockKey, long timeout) {
+    public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey, long timeout) {
         this(redisTemplate, lockKey, null, timeout);
     }
 
-    public RedisLock(StringRedisTemplate redisTemplate, String lockKey, Integer expireTime, Long timeout) {
+    public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey, Integer expireTime, Long timeout) {
         this.redisTemplate = redisTemplate;
-        this.lockKey = lockKey + "_lock";
+        this.lockKey = lockKey + "__LOCk__";
         this.expireTime = expireTime == null ? DEFAULT_EXPIRE_MS : expireTime;
         this.timeout = timeout == null ? DEFAULT_RETRY_TIMEOUT_MS : timeout;
     }
@@ -70,29 +70,46 @@ public class RedisLock {
         long retryTimeout = TimeUnit.MILLISECONDS.toNanos(timeout);
         long nowTime = System.nanoTime();
 
+        logger.info("Starting to try to receive a [{}] lock from redis...", lockKey);
         while ((System.nanoTime() - nowTime) < retryTimeout) {
+            logger.info("Trying...");
             if (OK.equalsIgnoreCase(set(lockKey, lockValue, expireTime))) {
-                return (locked = true);
+                logger.info("Received a [{}] lock.", lockKey);
+                locked = true;
+                return true;
             }
+            logger.info("Waiting retry until timeout...");
             sleep(10, 50000);
         }
 
-        return locked;
+        logger.info("Oops! Try to receive a [{}] lock timeout.", lockKey);
+        return false;
     }
 
     public boolean lock() {
         lockValue = UUID.randomUUID().toString();
-        String result = set(lockKey, lockValue, expireTime);
-        return OK.equalsIgnoreCase(result);
+        logger.info("Starting to try to receive a [{}] lock from redis...", lockKey);
+        if (OK.equalsIgnoreCase(set(lockKey, lockValue, expireTime))) {
+            logger.info("Received a [{}] lock.", lockKey);
+            locked = true;
+            return true;
+        } else {
+            logger.info("A [{}] lock has been received from others.", lockKey);
+            return false;
+        }
     }
 
     public boolean lockBlock() {
         lockValue = UUID.randomUUID().toString();
+        logger.info("Starting to try to receive a [{}] lock from redis...", lockKey);
         while (true) {
-            String result = set(lockKey, lockValue, expireTime);
-            if (OK.equalsIgnoreCase(result)) {
+            logger.info("Trying...");
+            if (OK.equalsIgnoreCase(set(lockKey, lockValue, expireTime))) {
+                logger.info("Received a [{}] lock.", lockKey);
+                locked = true;
                 return true;
             }
+            logger.info("Waiting retry until received a lock...");
             sleep(10, 50000);
         }
     }
@@ -100,6 +117,7 @@ public class RedisLock {
     public Boolean unlock() {
 
         if (!locked) {
+            logger.info("Could not found a lock.");
             return true;
         }
 
@@ -120,11 +138,9 @@ public class RedisLock {
                 result = (Long) ((Jedis) nativeConnection).eval(LUA_UNLOCK_SCRIPT, keys, values);
             }
 
-            if (result == 0 && !StringUtils.isEmpty(lockKeyLog)) {
-                logger.warn("Unlock {} fail.", lockKeyLog);
-            }
-
+            // 1 unlock success
             locked = result == 0;
+            logger.info("Unlock [{}] {}.", lockKey, locked ? "fail" : "succeed");
             return result == 1;
         });
 
@@ -142,10 +158,6 @@ public class RedisLock {
 
             if (nativeConnection instanceof Jedis) {
                 result = ((Jedis) nativeConnection).set(key, value, NX, EX, seconds);
-            }
-
-            if (!StringUtils.isEmpty(lockKeyLog) && !StringUtils.isEmpty(result)) {
-                logger.info("Fetch lock {}.", lockKeyLog);
             }
 
             return result;

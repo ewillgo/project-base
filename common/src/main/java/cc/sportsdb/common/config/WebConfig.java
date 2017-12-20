@@ -22,10 +22,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.Arrays;
 
 @Configuration
+@EnableAsync
 @ComponentScan(value = {
         "cc.sportsdb.common.**.controller"
 })

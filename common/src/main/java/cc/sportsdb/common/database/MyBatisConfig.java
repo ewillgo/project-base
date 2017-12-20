@@ -13,7 +13,7 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import java.util.Properties;
 
 @Configuration
-@MapperScan(basePackages = "cc.sportsdb.**.dao")
+@MapperScan(basePackages = "**.dao")
 public class MyBatisConfig {
 
     @Bean(name = "sqlSessionFactory")

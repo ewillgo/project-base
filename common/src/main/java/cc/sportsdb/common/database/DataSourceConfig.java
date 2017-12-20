@@ -60,6 +60,11 @@ public class DataSourceConfig implements EnvironmentAware {
         return new DataSourceTransactionManager(dataSource);
     }
 
+    @Bean
+    public DataSourceSwitchAspect dataSourceSwitchAspect() {
+        return new DataSourceSwitchAspect();
+    }
+
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;

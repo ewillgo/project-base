@@ -4,18 +4,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
-import org.springframework.stereotype.Component;
 
 @Aspect
-@Component
 public class DataSourceSwitchAspect implements Ordered {
 
-    @Value("10")
-    private int order;
-
-    @Pointcut("execution(public * cc.sportsdb..*.service..*.*(..))")
+    @Pointcut("@annotation(cc.sportsdb.common.database.DataSource)")
     public void pointcut() {
     }
 
@@ -31,6 +25,6 @@ public class DataSourceSwitchAspect implements Ordered {
 
     @Override
     public int getOrder() {
-        return order;
+        return 0;
     }
 }
