@@ -46,7 +46,7 @@ public class AutoRefreshRedisCache extends RedisCache {
     public Cache.ValueWrapper get(Object key) {
         Cache.ValueWrapper valueWrapper = super.get(key);
         if (valueWrapper != null) {
-            refreshCache(super.getName(), (String) key);
+            refreshCache(super.getName(), String.valueOf(key));
         }
         return valueWrapper;
     }
