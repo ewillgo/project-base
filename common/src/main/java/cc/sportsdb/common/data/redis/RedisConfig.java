@@ -13,6 +13,11 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import static cc.sportsdb.common.data.redis.RedisConstant.KEY_FORMAT;
+
 @Configuration
 @EnableCaching
 public class RedisConfig extends CachingConfigurerSupport {
@@ -42,8 +47,12 @@ public class RedisConfig extends CachingConfigurerSupport {
 
     @Override
     public KeyGenerator keyGenerator() {
-        return (target, method, params) -> {
-            return target.getClass().getSimpleName() + "." + method.getName();
-        };
+        return (target, method, parameters) -> String.format(KEY_FORMAT,
+                target.getClass().getName(),
+                method.getName(),
+                Arrays.stream(parameters)
+                        .map(parameter -> parameter.getClass().getSimpleName())
+                        .collect(Collectors.joining(","))
+        );
     }
 }

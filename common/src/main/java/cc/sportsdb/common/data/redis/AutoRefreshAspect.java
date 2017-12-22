@@ -13,6 +13,9 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static cc.sportsdb.common.data.redis.RedisConstant.KEY_FORMAT;
+import static cc.sportsdb.common.data.redis.RedisConstant.METHOD_KEY_FORMAT;
+
 @Aspect
 public class AutoRefreshAspect implements Ordered {
 
@@ -20,8 +23,6 @@ public class AutoRefreshAspect implements Ordered {
     @Pointcut("@annotation(org.springframework.cache.annotation.Cacheable)")
     public void pointcut() {
     }
-
-    private static final String KEY_FORMAT = "%s__%s__";
 
     @Around("@annotation(cacheable)")
     public Object proceed(ProceedingJoinPoint joinPoint, Cacheable cacheable) throws Throwable {
@@ -33,7 +34,7 @@ public class AutoRefreshAspect implements Ordered {
             return joinPoint.proceed();
         }
 
-        String key = String.format(KEY_FORMAT, cacheName,
+        String key = String.format(METHOD_KEY_FORMAT, cacheName,
                 StringUtils.isEmpty(cacheKey)
                         ? generateKey(joinPoint.getTarget().getClass(), joinPoint.getSignature(), joinPoint.getArgs())
                         : cacheKey);
@@ -53,14 +54,13 @@ public class AutoRefreshAspect implements Ordered {
     }
 
     private String generateKey(Class<?> target, Signature signature, Object[] args) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(target.getName()).append(".")
-                .append(signature.getName()).append(" (")
-                .append(Arrays.stream(args)
+        return String.format(KEY_FORMAT,
+                target.getName(),
+                signature.getName(),
+                Arrays.stream(args)
                         .map(parameter -> parameter.getClass().getSimpleName())
-                        .collect(Collectors.joining(",")))
-                .append(")");
-        return sb.toString();
+                        .collect(Collectors.joining(","))
+        );
     }
 
     @Override
