@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AutoRefreshRedisCacheManager extends RedisCacheManager {
+class AutoRefreshRedisCacheManager extends RedisCacheManager {
 
     private boolean cacheNullValues;
     private final ConcurrentHashMap<String, Pair<Long, Long>> TIME_MAP = new ConcurrentHashMap<>();
@@ -22,7 +22,6 @@ public class AutoRefreshRedisCacheManager extends RedisCacheManager {
     private static final String MARK = "$";
     private static final String SEPARATOR = "#";
     private static final Logger logger = LoggerFactory.getLogger(AutoRefreshRedisCacheManager.class);
-
 
     @Autowired
     DefaultListableBeanFactory beanFactory;

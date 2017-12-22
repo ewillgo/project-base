@@ -1,15 +1,19 @@
 package cc.sportsdb.common.data.redis;
 
+import cc.sportsdb.common.util.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.MethodInvoker;
 
 import java.util.concurrent.TimeUnit;
 
-public class AutoRefreshRedisCache extends RedisCache {
+import static cc.sportsdb.common.data.redis.RedisConstant.METHOD_KEY_FORMAT;
+
+class AutoRefreshRedisCache extends RedisCache {
 
     private long refreshThreshold;
     private RedisTemplate<String, Object> redisTemplate;
@@ -58,14 +62,21 @@ public class AutoRefreshRedisCache extends RedisCache {
             return;
         }
 
-        RedisLock redisLock = new RedisLock(redisTemplate,
-                String.format("%s:%s", cacheName, cacheKey), LOCK_TIMEOUT);
+        String key = String.format(METHOD_KEY_FORMAT, cacheName, cacheKey);
+        RedisLock redisLock = new RedisLock(redisTemplate, HashUtil.md5(key), LOCK_TIMEOUT);
 
         if (redisLock.lock()) {
             try {
                 Long innerRemainTTL = redisTemplate.getExpire(cacheKey);
                 if (null != innerRemainTTL && innerRemainTTL <= refreshThreshold) {
-
+                    try {
+                        MethodInvoker methodInvoker = CacheInvokerHolder.getCacheMethodInvoker(key);
+                        if (methodInvoker != null) {
+                            methodInvoker.invoke();
+                        }
+                    } catch (Exception e) {
+                        logger.error("Auto invoke cache method fail, key: {}", key);
+                    }
                 }
             } finally {
                 redisLock.unlock();

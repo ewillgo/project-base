@@ -4,7 +4,7 @@ import org.springframework.util.MethodInvoker;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CacheInvokerHolder {
+class CacheInvokerHolder {
     private static final ConcurrentHashMap<String, MethodInvoker> CACHE_INVOKER_MAP = new ConcurrentHashMap<>();
 
     public static MethodInvoker getCacheMethodInvoker(String cacheKey) {

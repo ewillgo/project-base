@@ -17,7 +17,7 @@ import static cc.sportsdb.common.data.redis.RedisConstant.KEY_FORMAT;
 import static cc.sportsdb.common.data.redis.RedisConstant.METHOD_KEY_FORMAT;
 
 @Aspect
-public class AutoRefreshAspect implements Ordered {
+class AutoRefreshAspect implements Ordered {
 
 
     @Pointcut("@annotation(org.springframework.cache.annotation.Cacheable)")
