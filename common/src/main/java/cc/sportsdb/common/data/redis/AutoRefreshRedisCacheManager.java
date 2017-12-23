@@ -69,6 +69,7 @@ class AutoRefreshRedisCacheManager extends RedisCacheManager {
 
         TIME_MAP.put(cacheName, Pair.make(
                 getExpirationTime(cacheName, cacheParams), getRefreshThreshold(cacheParams)));
+
         return super.getCache(cacheName);
     }
 

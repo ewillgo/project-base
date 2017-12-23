@@ -20,8 +20,6 @@ public abstract class ReflectionUtil {
         return (T) objects[0];
     }
 
-
-
     @SuppressWarnings("unchecked")
     public static <T> T invokeMethod(Object instance, String methodName, Class<?>[] paramTypes, Object[] args) {
         Method method = ReflectionUtils.findMethod(instance.getClass(), methodName, paramTypes);

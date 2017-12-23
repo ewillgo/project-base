@@ -9,7 +9,7 @@ import org.springframework.util.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -22,8 +22,6 @@ public class RedisLock {
     private static final String NX = "NX";
     private static final String EX = "EX";
     private static final String OK = "OK";
-    private static final long DEFAULT_RETRY_TIMEOUT_MS = 100;
-    private static final int DEFAULT_EXPIRE_MS = 60;
     private static final String LUA_UNLOCK_SCRIPT;
 
     static {
@@ -39,35 +37,24 @@ public class RedisLock {
 
     private String lockKey;
     private String lockValue;
-    private String lockKeyLog = "";
     private volatile boolean locked = false;
-    private long timeout = DEFAULT_RETRY_TIMEOUT_MS;
-    private int expireTime = DEFAULT_EXPIRE_MS;
+    private long expireTime = TimeUnit.SECONDS.toSeconds(1);
     private RedisTemplate<String, Object> redisTemplate;
     private final Random random = new Random();
 
     public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey) {
-        this(redisTemplate, lockKey, null, null);
+        this(redisTemplate, lockKey, null);
     }
 
-    public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey, int expireTime) {
-        this(redisTemplate, lockKey, expireTime, null);
-    }
-
-    public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey, long timeout) {
-        this(redisTemplate, lockKey, null, timeout);
-    }
-
-    public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey, Integer expireTime, Long timeout) {
+    public RedisLock(RedisTemplate<String, Object> redisTemplate, String lockKey, Long expireTime) {
         this.redisTemplate = redisTemplate;
         this.lockKey = lockKey + "__LOCk__";
-        this.expireTime = expireTime == null ? DEFAULT_EXPIRE_MS : expireTime;
-        this.timeout = timeout == null ? DEFAULT_RETRY_TIMEOUT_MS : timeout;
+        this.expireTime = expireTime == null ? this.expireTime : expireTime;
     }
 
-    public boolean tryLock() {
+    public boolean tryLock(long timeoutInSeconds) {
         lockValue = UUID.randomUUID().toString();
-        long retryTimeout = TimeUnit.MILLISECONDS.toNanos(timeout);
+        long retryTimeout = TimeUnit.SECONDS.toNanos(timeoutInSeconds);
         long nowTime = System.nanoTime();
 
         logger.info("Starting to try to receive a [{}] lock from redis...", lockKey);
@@ -125,20 +112,16 @@ public class RedisLock {
             Object nativeConnection = connection.getNativeConnection();
             Long result = 0L;
 
-            List<String> keys = new ArrayList<>(1);
-            keys.add(lockKey);
-            List<String> values = new ArrayList<>(1);
-            values.add(lockValue);
+            List<String> keys = Arrays.asList(lockKey);
+            List<String> values = Arrays.asList(lockValue);
 
             if (nativeConnection instanceof JedisCluster) {
                 result = (Long) ((JedisCluster) nativeConnection).eval(LUA_UNLOCK_SCRIPT, keys, values);
-            }
-
-            if (nativeConnection instanceof Jedis) {
+            } else if (nativeConnection instanceof Jedis) {
                 result = (Long) ((Jedis) nativeConnection).eval(LUA_UNLOCK_SCRIPT, keys, values);
             }
 
-            // 1 unlock success
+            // 1 represent unlock success
             locked = result == 0;
             logger.info("Unlock [{}] {}.", lockKey, locked ? "fail" : "succeed");
             return result == 1;
@@ -172,27 +155,11 @@ public class RedisLock {
         }
     }
 
-    public String getLockKeyLog() {
-        return lockKeyLog;
-    }
-
-    public void setLockKeyLog(String lockKeyLog) {
-        this.lockKeyLog = lockKeyLog;
-    }
-
-    public int getExpireTime() {
+    public long getExpireTime() {
         return expireTime;
     }
 
-    public void setExpireTime(int expireTime) {
+    public void setExpireTime(long expireTime) {
         this.expireTime = expireTime;
-    }
-
-    public long getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
     }
 }
