@@ -101,7 +101,7 @@ public class RedisLock {
         }
     }
 
-    public Boolean unlock() {
+    public boolean unlock() {
 
         if (!locked) {
             logger.info("Could not found a lock.");

@@ -16,7 +16,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -28,9 +27,6 @@ import java.util.Arrays;
 
 @Configuration
 @EnableAsync
-@ComponentScan(value = {
-        "cc.sportsdb.common.**.controller"
-})
 @ImportAutoConfiguration({
         WebMvcConfig.class,
         DataSourceConfig.class,
