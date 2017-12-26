@@ -8,8 +8,7 @@ public class MyBatisConfig {
 
     @Bean
     public MyBatisInterceptor myBatisInterceptor() {
-        MyBatisInterceptor myBatisInterceptor = new MyBatisInterceptor();
-        return myBatisInterceptor;
+        return new MyBatisInterceptor();
     }
 
 }
