@@ -14,11 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static cc.sportsdb.common.database.mybatis.MyBatisConstant.*;
+import static cc.sportsdb.common.database.mybatis.MyBatisConstant.METHOD_PREPARE;
+import static cc.sportsdb.common.database.mybatis.MyBatisConstant.METHOD_QUERY;
 
 @Intercepts({
         @Signature(type = StatementHandler.class, method = METHOD_QUERY, args = {Statement.class, ResultHandler.class}),
@@ -33,7 +35,7 @@ class MyBatisInterceptor implements Interceptor {
     public Object intercept(Invocation invocation) throws Throwable {
 
         if (METHOD_PREPARE.equals(invocation.getMethod().getName())) {
-            prepareStatementHandler(invocation);
+            return prepareStatementHandler(invocation);
         } else if (METHOD_QUERY.equals(invocation.getMethod().getName())) {
             return queryHandler(invocation);
         }
@@ -52,21 +54,21 @@ class MyBatisInterceptor implements Interceptor {
 
         try {
             result = invocation.proceed();
-            if (result instanceof List) {
-                page.setDataList((List) result);
-            }
+            page.setDataList((result != null && result instanceof List) ? (List) result : new ArrayList<>());
         } finally {
             pageThreadLocal.remove();
         }
 
-        return page;
+        return result;
     }
 
-    private void prepareStatementHandler(Invocation invocation) throws SQLException {
+    private Object prepareStatementHandler(Invocation invocation)
+            throws SQLException, InvocationTargetException, IllegalAccessException {
+
         RoutingStatementHandler handler = (RoutingStatementHandler) invocation.getTarget();
 
         if (!hasPageInfo(handler.getBoundSql().getParameterObject())) {
-            return;
+            return invocation.proceed();
         }
 
         Connection connection = (Connection) invocation.getArgs()[0];
@@ -74,11 +76,16 @@ class MyBatisInterceptor implements Interceptor {
         StatementHandler delegate = ReflectionUtil.getFieldValue(handler, "delegate");
         BoundSql boundSql = delegate.getBoundSql();
 
-        Page<?> page = new Page<>();
-        fillPageInfo(boundSql.getParameterObject(), page);
+        Page<?> page = getPage(boundSql.getParameterObject());
+
+        if (page == null) {
+            return invocation.proceed();
+        }
+
         executeAndSetTotalCount(connection, delegate, boundSql, page);
         injectLimitSql(boundSql, dbType, page);
         pageThreadLocal.set(page);
+        return invocation.proceed();
     }
 
     private void executeAndSetTotalCount(Connection connection, StatementHandler delegate, BoundSql boundSql, Page<?> page) {
@@ -96,6 +103,9 @@ class MyBatisInterceptor implements Interceptor {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     page.setTotalRecord(rs.getLong(1));
+                    page.setTotalPage((int) Math.ceil(page.getTotalRecord() * 1.0 / page.getPageSize()));
+                    page.setFirstPage(page.getPageNo() == 1);
+                    page.setLastPage(page.getPageNo() == page.getTotalPage());
                 }
             }
         } catch (SQLException e) {
@@ -107,15 +117,20 @@ class MyBatisInterceptor implements Interceptor {
         return String.format("SELECT COUNT(*) FROM (%s) t", sql);
     }
 
-    private void fillPageInfo(Object parameterObject, Page<?> page) {
+    private Page<?> getPage(Object parameterObject) {
+
+        if (parameterObject instanceof Page) {
+            return (Page<?>) parameterObject;
+        }
+
         Map<?, ?> parameterMap = (Map<?, ?>) parameterObject;
         for (Map.Entry<?, ?> entry : parameterMap.entrySet()) {
-            if (((String) entry.getKey()).equalsIgnoreCase(FIELD_PAGE_NO)) {
-                page.setPageNo((Integer) entry.getValue());
-            } else if (((String) entry.getKey()).equalsIgnoreCase(FIELD_PAGE_SIZE)) {
-                page.setPageSize((Integer) entry.getValue());
+            if (entry.getValue() instanceof Page) {
+                return (Page<?>) entry.getValue();
             }
         }
+
+        return null;
     }
 
     private void injectLimitSql(BoundSql boundSql, MyBatisConstant.DBType dbType, Page<?> page) {
@@ -138,25 +153,9 @@ class MyBatisInterceptor implements Interceptor {
     }
 
     private boolean hasPageInfo(Object parameterObject) {
-        if (!(parameterObject instanceof Map<?, ?>)) {
-            return false;
-        }
-
-        boolean hasPageNo = false;
-        boolean hasPageSize = false;
-        Map<?, ?> parameterMap = (Map<?, ?>) parameterObject;
-
-        for (Map.Entry<?, ?> entry : parameterMap.entrySet()) {
-            if (((String) entry.getKey()).equalsIgnoreCase(FIELD_PAGE_NO)
-                    && (entry.getValue() instanceof Integer)) {
-                hasPageNo = true;
-            } else if (((String) entry.getKey()).equalsIgnoreCase(FIELD_PAGE_SIZE)
-                    && (entry.getValue() instanceof Integer)) {
-                hasPageSize = true;
-            }
-        }
-
-        return hasPageNo && hasPageSize;
+        return (parameterObject instanceof Map<?, ?>)
+                ? ((Map<?, ?>) parameterObject).values().stream().anyMatch((value) -> value.getClass().isInstance(Page.class))
+                : parameterObject instanceof Page;
     }
 
     @Override

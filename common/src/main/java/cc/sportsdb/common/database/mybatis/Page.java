@@ -34,7 +34,7 @@ public class Page<T> implements Serializable {
         return dataList;
     }
 
-    public void setDataList(List<T> dataList) {
+    void setDataList(List<T> dataList) {
         this.dataList = dataList;
     }
 
