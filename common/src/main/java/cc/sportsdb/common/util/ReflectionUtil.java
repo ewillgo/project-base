@@ -2,6 +2,7 @@ package cc.sportsdb.common.util;
 
 import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public abstract class ReflectionUtil {
@@ -18,6 +19,15 @@ public abstract class ReflectionUtil {
             objects[0] = field.get(instance);
         }, (field) -> field.getName().equals(name));
         return (T) objects[0];
+    }
+
+    public static void setFieldValue(Object instance, String name, Object value) {
+        Field[] fields = new Field[1];
+        ReflectionUtils.doWithFields(instance.getClass(), field -> {
+            fields[0] = field;
+        }, field -> field.getName().equals(name));
+        fields[0].setAccessible(true);
+        ReflectionUtils.setField(fields[0], instance, value);
     }
 
     @SuppressWarnings("unchecked")
