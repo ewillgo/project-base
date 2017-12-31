@@ -154,7 +154,7 @@ class MyBatisInterceptor implements Interceptor {
 
     private boolean hasPageInfo(Object parameterObject) {
         return (parameterObject instanceof Map<?, ?>)
-                ? ((Map<?, ?>) parameterObject).values().stream().anyMatch((value) -> value.getClass().isInstance(Page.class))
+                ? ((Map<?, ?>) parameterObject).values().stream().anyMatch((value) -> value instanceof Page)
                 : parameterObject instanceof Page;
     }
 
