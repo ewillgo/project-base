@@ -4,9 +4,6 @@ interface MyBatisConstant {
     String METHOD_QUERY = "query";
     String METHOD_PREPARE = "prepare";
 
-    String FIELD_PAGE_NO = "pageNo";
-    String FIELD_PAGE_SIZE = "pageSize";
-
     enum DBType {
 
         MYSQL("MYSQL"), ORACLE("ORACLE");
