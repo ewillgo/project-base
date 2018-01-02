@@ -1,5 +1,6 @@
 package cc.sportsdb.common.config;
 
+import cc.sportsdb.common.controller.GlobalExceptionController;
 import cc.sportsdb.common.data.mq.MqConfig;
 import cc.sportsdb.common.data.redis.RedisConfig;
 import cc.sportsdb.common.database.DataSourceConfig;
@@ -34,7 +35,8 @@ import java.util.Arrays;
         MyBatisConfig.class,
         RestTemplateConfig.class,
         RedisConfig.class,
-        MqConfig.class
+        MqConfig.class,
+        GlobalExceptionController.class
 })
 public class WebConfig implements ApplicationContextAware {
 

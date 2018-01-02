@@ -21,6 +21,16 @@ public class GlobalExceptionController {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionController.class);
 
     @ResponseBody
+    @ExceptionHandler(value = Exception.class)
+    public Result<String> exceptionHandler(Exception e) {
+        logger.error(e.getMessage(), e);
+        Result<String> result = new Result<>();
+        result.setStatus(Result.FAIL);
+        result.setMessage(e.getMessage());
+        return result;
+    }
+
+    @ResponseBody
     @ExceptionHandler(value = BindException.class)
     public Result<Map<String, String>> validationException(BindException e, BindingResult bindingResult) {
         logger.error(e.getMessage(), e);
