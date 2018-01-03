@@ -1,6 +1,7 @@
 package cc.sportsdb.common.util;
 
 import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Position;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,11 +17,11 @@ public abstract class UploadUtil {
 
     }
 
-    public static void uploadFile(MultipartFile file, MultipartFileHandler handler) throws IOException {
-        uploadFile(new MultipartFile[]{file}, handler);
+    public static void handleFile(MultipartFile file, MultipartFileHandler handler) {
+        handleFile(new MultipartFile[]{file}, handler);
     }
 
-    public static void uploadFile(MultipartFile[] files, MultipartFileHandler handler) throws IOException {
+    public static void handleFile(MultipartFile[] files, MultipartFileHandler handler) {
 
         if (files == null || files.length == 0) {
             throw new IllegalArgumentException("No files to handle.");
@@ -35,12 +36,14 @@ public abstract class UploadUtil {
     }
 
     public interface MultipartFileHandler {
-        void handle(EhanceMultipartFile ehanceMultipartFile) throws IOException;
+
+        void handle(EhanceMultipartFile file);
 
         class EhanceMultipartFile {
 
             private boolean image;
             private MultipartFile file;
+            private BufferedImage bufferedImage;
             private Thumbnails.Builder<BufferedImage> imageBuilder;
             private static final String IMAGE_CONTENT_TYPE_PREFIX = "image/";
             private static final String IMAGE_OPERATION_TIPS = "Image %s operation need a image file.";
@@ -82,15 +85,36 @@ public abstract class UploadUtil {
                 this.image = image;
             }
 
-            public EhanceMultipartFile crop(int width, int height) throws IOException {
-                crop(width, height, DEFAULT_QUALITY);
+            public EhanceMultipartFile quality(double quality) throws IOException {
+                assertImage("[quality]");
+                buildBufferedImage();
+                imageBuilder.useOriginalFormat().outputQuality(quality);
                 return this;
             }
 
             public EhanceMultipartFile crop(int width, int height, double quality) throws IOException {
+                crop(width, height, Positions.CENTER, quality);
+                return this;
+            }
+
+            public EhanceMultipartFile crop(int width, int height) throws IOException {
+                crop(width, height, Positions.CENTER);
+                return this;
+            }
+
+            public EhanceMultipartFile crop(int width, int height, Position position) throws IOException {
+                crop(width, height, position, DEFAULT_QUALITY);
+                return this;
+            }
+
+            public EhanceMultipartFile crop(int width, int height, Position position, double quality) throws IOException {
                 assertImage("[crop]");
                 buildBufferedImage();
-                imageBuilder.outputQuality(quality).size(width, height).crop(Positions.CENTER);
+                imageBuilder
+                        .scale(1.0)
+                        .outputQuality(quality)
+                        .useOriginalFormat()
+                        .sourceRegion(position, Math.min(width, bufferedImage.getWidth()), Math.min(height, bufferedImage.getHeight()));
                 return this;
             }
 
@@ -102,14 +126,33 @@ public abstract class UploadUtil {
             public EhanceMultipartFile resize(int width, int height, double quality) throws IOException {
                 assertImage("[resize]");
                 buildBufferedImage();
-                imageBuilder.outputQuality(quality).size(width, height);
+                imageBuilder
+                        .outputQuality(quality)
+                        .useOriginalFormat()
+                        .size(Math.min(width, bufferedImage.getWidth()), Math.min(height, bufferedImage.getHeight()))
+                        .keepAspectRatio(false);
                 return this;
             }
 
-            public EhanceMultipartFile rotate() {
+            public EhanceMultipartFile rotate(double angle) throws IOException {
+                rotate(angle, DEFAULT_QUALITY);
+                return this;
+            }
 
+            public EhanceMultipartFile rotate(double angle, double quality) throws IOException {
                 assertImage("[rotate]");
+                buildBufferedImage();
+                imageBuilder
+                        .size(bufferedImage.getWidth(), bufferedImage.getHeight())
+                        .outputQuality(quality)
+                        .keepAspectRatio(true)
+                        .useOriginalFormat()
+                        .rotate(angle);
+                return this;
+            }
 
+            public EhanceMultipartFile scale(double rate) throws IOException {
+                scale(rate, rate, DEFAULT_QUALITY);
                 return this;
             }
 
@@ -121,13 +164,24 @@ public abstract class UploadUtil {
             public EhanceMultipartFile scale(double width, double height, double quality) throws IOException {
                 assertImage("[scale]");
                 buildBufferedImage();
-                imageBuilder.outputQuality(quality).scale(width, height);
+                imageBuilder.scale(width, height).outputQuality(quality).useOriginalFormat();
                 return this;
             }
 
-            public EhanceMultipartFile waterMark() {
-                assertImage("[watermark]");
+            public EhanceMultipartFile watermark(Position position, File watermarkFile, float opacity) throws IOException {
+                watermark(position, watermarkFile, opacity, DEFAULT_QUALITY);
+                return this;
+            }
 
+            public EhanceMultipartFile watermark(Position position, File watermarkFile, float opacity, double quality) throws IOException {
+                assertImage("[watermark]");
+                buildBufferedImage();
+                imageBuilder
+                        .size(bufferedImage.getWidth(), bufferedImage.getHeight())
+                        .keepAspectRatio(true)
+                        .outputQuality(quality)
+                        .useOriginalFormat()
+                        .watermark(position, ImageIO.read(watermarkFile), opacity);
                 return this;
             }
 
@@ -150,20 +204,16 @@ public abstract class UploadUtil {
                 }
             }
 
-            public void buildFileDir(File file) {
-                File dir = new File(file.getPath().substring(
-                        0, file.getPath().lastIndexOf(File.separator)));
-                if (!dir.exists()) {
-                    dir.mkdirs();
-                }
+            private boolean buildFileDir(File file) {
+                return new File(file.getParent()).mkdirs();
             }
 
             private void buildBufferedImage() throws IOException {
                 if (!isImage() || imageBuilder != null) {
                     return;
                 }
-
-                imageBuilder = Thumbnails.of(ImageIO.read(file.getInputStream()));
+                bufferedImage = ImageIO.read(file.getInputStream());
+                imageBuilder = Thumbnails.of(bufferedImage);
             }
 
             private void assertImage(String operationName) {
