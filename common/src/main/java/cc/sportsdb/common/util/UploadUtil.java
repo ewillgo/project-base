@@ -196,7 +196,7 @@ public abstract class UploadUtil {
             }
 
             public void transferTo(File destFile) throws IOException {
-                buildFileDir(destFile);
+                mkdirs(destFile);
                 if (imageBuilder != null) {
                     imageBuilder.toFile(destFile);
                 } else {
@@ -204,7 +204,7 @@ public abstract class UploadUtil {
                 }
             }
 
-            private boolean buildFileDir(File file) {
+            private boolean mkdirs(File file) {
                 return new File(file.getParent()).mkdirs();
             }
 

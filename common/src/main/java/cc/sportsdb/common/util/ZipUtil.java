@@ -1,5 +1,6 @@
 package cc.sportsdb.common.util;
 
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -18,6 +20,19 @@ public abstract class ZipUtil {
 
     private ZipUtil() {
 
+    }
+
+    public static void unzip(String zipFile, String destDir) throws IOException {
+        List<ZipFile> zipFileList = unzip(zipFile);
+        if (CollectionUtils.isEmpty(zipFileList)) {
+            return;
+        }
+
+        for (ZipFile file : zipFileList) {
+            File destFile = new File(destDir + File.separator + file.getName());
+            mkdirs(destFile);
+            FileCopyUtils.copy(file.getOutputStream().toByteArray(), destFile);
+        }
     }
 
     public static List<ZipFile> unzip(String filePath) throws IOException {
@@ -38,16 +53,28 @@ public abstract class ZipUtil {
 
         int len;
         byte[] buffer = new byte[1024];
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile), Charset.forName("GBK"))) {
             ZipEntry zipEntry;
             ByteArrayOutputStream bos;
+
             while ((zipEntry = zis.getNextEntry()) != null) {
-                bos = new ByteArrayOutputStream();
-                while ((len = zis.read(buffer)) > 0) {
-                    bos.write(buffer, 0, len);
+                try {
+                    if (zipEntry.isDirectory()) {
+                        continue;
+                    }
+
+                    bos = new ByteArrayOutputStream();
+                    while ((len = zis.read(buffer)) > 0) {
+                        bos.write(buffer, 0, len);
+                    }
+
+                    zipFileList.add(new ZipFile(new File(
+                            zipFile.getParent() + File.separator + zipEntry.getName()).getParent(), zipEntry.getName(), bos));
+                } finally {
+                    zis.closeEntry();
                 }
-                zipFileList.add(new ZipFile(zipEntry.getName(), bos));
             }
+
         }
 
         return zipFileList;
@@ -97,7 +124,7 @@ public abstract class ZipUtil {
         return new ZipPackage(bos);
     }
 
-    private static boolean buildFileDir(File file) {
+    private static boolean mkdirs(File file) {
         return new File(file.getParent()).mkdirs();
     }
 
@@ -131,7 +158,7 @@ public abstract class ZipUtil {
 
         public void transferTo(File destFile) throws IOException {
             if (zipOutputStream != null) {
-                buildFileDir(destFile);
+                mkdirs(destFile);
                 FileCopyUtils.copy(zipOutputStream.toByteArray(), destFile);
             }
         }
@@ -139,18 +166,32 @@ public abstract class ZipUtil {
 
     public static class ZipFile {
         private String name;
+        private String parent;
         private ByteArrayOutputStream outputStream;
 
         public ZipFile(String name, ByteArrayOutputStream outputStream) {
+            this(null, name, outputStream);
+        }
+
+        public ZipFile(String parent, String name, ByteArrayOutputStream outputStream) {
+            this.parent = parent;
             this.name = name;
             this.outputStream = outputStream;
         }
 
         public void transferTo(File destFile) throws IOException {
             if (outputStream != null) {
-                buildFileDir(destFile);
+                mkdirs(destFile);
                 FileCopyUtils.copy(outputStream.toByteArray(), destFile);
             }
+        }
+
+        public String getParent() {
+            return parent;
+        }
+
+        public void setParent(String parent) {
+            this.parent = parent;
         }
 
         public String getName() {
