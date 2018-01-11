@@ -1,6 +1,7 @@
 package cc.sportsdb.common.data.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -11,9 +12,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnection;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import redis.clients.jedis.Jedis;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -22,6 +26,7 @@ import static cc.sportsdb.common.data.redis.RedisConstant.EMPTY_KEY_FORMAT;
 
 @Configuration
 @EnableCaching
+@ConditionalOnClass({JedisConnection.class, RedisOperations.class, Jedis.class})
 public class RedisConfig extends CachingConfigurerSupport {
 
     @Bean(name = RedisConstant.REDIS_TEMPLATE_NAME)
