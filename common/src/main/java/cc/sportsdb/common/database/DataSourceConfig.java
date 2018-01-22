@@ -54,8 +54,8 @@ public class DataSourceConfig implements EnvironmentAware {
         return dynamicDataSource;
     }
 
-    @Bean(name = "transactionManager")
     @ConditionalOnMissingBean
+    @Bean(name = "transactionManager")
     public PlatformTransactionManager transactionManager(AbstractRoutingDataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }

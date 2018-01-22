@@ -5,6 +5,7 @@ import cc.sportsdb.common.spring.FrameworkUtil;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,16 +26,19 @@ public class RestTemplateConfig {
     @Bean
     @Primary
     @LoadBalanced
+    @ConditionalOnMissingBean
     public RestTemplate restTemplate(OkHttp3ClientHttpRequestFactory factory) {
         return FrameworkUtil.enhanceRestTemplate(new RestTemplate(factory));
     }
 
+    @ConditionalOnMissingBean
     @Bean(name = RestConstant.RAW_NAME)
     public RestTemplate httpRestTemplate(OkHttp3ClientHttpRequestFactory factory) {
         return FrameworkUtil.enhanceRestTemplate(new RestTemplate(factory));
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public OkHttpClient okHttpClient() {
         return new OkHttpClient.Builder()
                 .addInterceptor(new HttpClientInterceptor())
@@ -47,6 +51,7 @@ public class RestTemplateConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public OkHttp3ClientHttpRequestFactory okHttp3ClientHttpRequestFactory(OkHttpClient okHttpClient) {
         return new OkHttp3ClientHttpRequestFactory(okHttpClient);
     }
