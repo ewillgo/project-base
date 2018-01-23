@@ -3,6 +3,7 @@ package cc.sportsdb.common.util;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -25,6 +26,20 @@ public abstract class JsonUtil {
     }
 
     private JsonUtil() {
+    }
+
+    public static <T> T parse(String jsonStr, TypeReference<? extends T> typeReference) {
+        return parse(jsonStr, typeReference, OBJECT_MAPPER);
+    }
+
+    public static <T> T parse(String jsonStr, TypeReference<? extends T> typeReference, ObjectMapper objectMapper) {
+        T t = null;
+        try {
+            t = objectMapper.readValue(jsonStr, typeReference);
+        } catch (IOException e) {
+            logger.error("Parse to object fail", e);
+        }
+        return t;
     }
 
     public static <T> T parse(String jsonStr, Class<? extends T> clazz) {

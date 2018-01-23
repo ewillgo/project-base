@@ -19,11 +19,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 @Configuration
@@ -49,6 +53,7 @@ public class WebConfig implements ApplicationContextAware {
     }
 
     @Bean
+    @Primary
     @ConditionalOnMissingBean
     public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(objectMapper);
@@ -65,11 +70,17 @@ public class WebConfig implements ApplicationContextAware {
         return new ByteArrayHttpMessageConverter();
     }
 
-//    @Bean
-//    @ConditionalOnMissingBean
-//    public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter() {
-//        return new MappingJackson2XmlHttpMessageConverter();
-//    }
+    @Bean
+    @ConditionalOnMissingBean
+    public MappingJackson2XmlHttpMessageConverter mappingJackson2XmlHttpMessageConverter() {
+        return new MappingJackson2XmlHttpMessageConverter();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public StringHttpMessageConverter stringHttpMessageConverter() {
+        return new StringHttpMessageConverter(Charset.forName("UTF-8"));
+    }
 
     @Bean
     @ConditionalOnMissingBean

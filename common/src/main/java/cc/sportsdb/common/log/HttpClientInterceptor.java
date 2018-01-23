@@ -5,12 +5,10 @@ import okhttp3.*;
 import okio.Buffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class HttpClientInterceptor implements Interceptor {
 
@@ -20,18 +18,22 @@ public class HttpClientInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
 
+        Map<String, Object> requestLogWrapper = new HashMap<>(1);
+
         Map<String, Object> requestMap = new LinkedHashMap<>();
         requestMap.put("url", request.url().url().toString());
         requestMap.put("method", request.method().toLowerCase());
         requestMap.put("parameters", getQueryString(request));
         requestMap.put("body", requestBodyToMap(requestBodyToString(request)));
         requestMap.put("headers", request.headers().toMultimap());
-        logger.info("ok3req:{}", JsonUtil.toJsonString(requestMap));
+        requestLogWrapper.put("ok3request", requestMap);
+        logger.info("{}", JsonUtil.toJsonString(requestLogWrapper));
 
         long t1 = System.nanoTime();
         Response response = chain.proceed(chain.request());
         long t2 = System.nanoTime();
 
+        Map<String, Object> responseLogWrapper = new HashMap<>(1);
         MediaType mediaType = response.body().contentType();
         String responseString = getResponseString(response);
         Map<String, Object> responseMap = new LinkedHashMap<>();
@@ -40,7 +42,8 @@ public class HttpClientInterceptor implements Interceptor {
         responseMap.put("url", response.request().url().toString());
         responseMap.put("headers", response.headers().toMultimap());
         responseMap.put("respdata", getResponseMap(mediaType, responseString));
-        logger.info("ok3resp:{}", JsonUtil.toJsonString(responseMap));
+        responseLogWrapper.put("ok3response", responseMap);
+        logger.info("{}", JsonUtil.toJsonString(responseLogWrapper));
 
         return response.newBuilder()
                 .body(ResponseBody.create(mediaType, responseString))
@@ -94,7 +97,7 @@ public class HttpClientInterceptor implements Interceptor {
     private Map<String, Object> requestBodyToMap(String requestBodyString) {
         Map<String, Object> requestBodyMap = null;
         try {
-            if (requestBodyString != null) {
+            if (!StringUtils.isEmpty(requestBodyString)) {
                 requestBodyMap = JsonUtil.parse(requestBodyString, Map.class);
             }
         } catch (Exception e) {

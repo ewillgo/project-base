@@ -8,7 +8,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.nio.charset.Charset;
 import java.util.stream.Collectors;
 
 public abstract class FrameworkUtil {
@@ -18,7 +17,7 @@ public abstract class FrameworkUtil {
     private FrameworkUtil() {
     }
 
-    public static RestTemplate enhanceRestTemplate(RestTemplate restTemplate) {
+    public static RestTemplate enhanceRestTemplate(String name, RestTemplate restTemplate) {
         if (restTemplate == null) {
             throw new IllegalArgumentException("RestTemplate could not be null.");
         }
@@ -26,11 +25,10 @@ public abstract class FrameworkUtil {
         restTemplate.getMessageConverters().removeIf(converter ->
                 !(converter instanceof MappingJackson2HttpMessageConverter) &&
                         !(converter instanceof ByteArrayHttpMessageConverter) &&
-                        !(converter instanceof MappingJackson2XmlHttpMessageConverter));
+                        !(converter instanceof MappingJackson2XmlHttpMessageConverter) &&
+                        !(converter instanceof StringHttpMessageConverter));
 
-        restTemplate.getMessageConverters().add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
-
-        logger.info("Message converters: {}", restTemplate.getMessageConverters().stream().map(c -> c.getClass().getSimpleName()).collect(Collectors.joining(",")));
+        logger.info("[{}] Message converters: {}", name, restTemplate.getMessageConverters().stream().map(c -> c.getClass().getSimpleName()).collect(Collectors.joining(",")));
         return restTemplate;
     }
 }
